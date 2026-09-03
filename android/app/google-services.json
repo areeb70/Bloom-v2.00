@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "370976164884",
+    "project_id": "bloom-874d6",
+    "storage_bucket": "bloom-874d6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:370976164884:android:7fa7f59db594543992ab01",
+        "android_client_info": {
+          "package_name": "com.areeb.bloom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "370976164884-519o6i7913o8dr1jf2psp4h8hk56ca5i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.areeb.bloom",
+            "certificate_hash": "057f48d37807c06fc146a98bd2f9d6cfc0a8f360"
+          }
+        },
+        {
+          "client_id": "370976164884-2g1tv4n98k60hhge8m6gdn7q62o02pn8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChD9ZQ5ch1LQRW4DMNmJg0z3UvAVoD8BU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "370976164884-2g1tv4n98k60hhge8m6gdn7q62o02pn8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

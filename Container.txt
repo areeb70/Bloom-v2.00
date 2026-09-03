@@ -1,0 +1,465 @@
+Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.surface,
+                            Theme.of(
+                              context,
+                            ).colorScheme.primary.withOpacity(0.2),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                            blurRadius: 3,
+                            offset: const Offset(0, 0),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                AppTexts.get('progress', lang),
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                "${(progress * 100).toInt()}%",
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: 12,
+                              backgroundColor: Colors.white.withOpacity(0.3),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            "Keep blooming, $_userName!",
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Tap to view your journey! 🌸
+
+
+
+
+
+
+
+                    body: _isLoading
+          ? theLoadingScreen()
+          : FadeScale(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+
+                    // --- ELEGANT GROWTH GAUGE ---
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MilestoneScreen(),
+                        ),
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.2),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                              blurRadius: 3,
+                              offset: const Offset(0, 0),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  AppTexts.get('progress', lang),
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  "${(progress * 100).toInt()}%",
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 12,
+                                backgroundColor: Colors.white.withOpacity(0.3),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Text(
+                              "Tap to view your journey! 🌸",
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                                fontSize: 14,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                    Text(
+                      AppTexts.get('choose_level', lang),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _levelCard("Seedling", Icons.grass, Colors.green, 0),
+                    _levelCard("Sprout", Icons.nature, Colors.lightGreen, 100),
+                    _levelCard("Leaf", Icons.eco, Colors.greenAccent, 200),
+                    _levelCard("Stem", Icons.stadium, Colors.lime, 300),
+                    _levelCard("Bloom", Icons.local_florist, Colors.teal, 400),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                HistoryScreen(user: widget.user),
+                          ),
+                        ),
+                        icon: const Icon(Icons.history),
+                        label: const Text("View Growth Journey"),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+    
+ // --- THE POPUP LOGS ---
+ 
+  dependencies:
+  flutter_svg: ^2.0.10+1
+
+  Tell Flutter that these files exist. Open pubspec.yaml and add this at the bottom:
+flutter:
+  assets:
+    - assets/icons/
+Now, instead of Icon(Icons.something), you use SvgPicture.asset().
+
+// 1. Add the import at the top
+import 'package:flutter_svg/flutter_svg.dart';
+
+// 2. Use it in the widget
+Container(
+  padding: const EdgeInsets.all(8),
+  decoration: BoxDecoration(
+    color: color.withOpacity(0.2), 
+    shape: BoxShape.circle,
+  ),
+  child: SvgPicture.asset(
+    'assets/icons/stem.svg', // The path to your file
+    colorFilter: ColorFilter.mode(color, BlendMode.srcIn), // This lets you change the color dynamically!
+    width: 28,
+    height: 28,
+  ),
+),
+
+static const List<Color> themePalette = [
+    Color(0xFF00897B), // Deep Teal
+    // Color(0xFF455A64), // Blue Grey
+    Color(0xFF673AB7), // Deep Purple
+    // Color(0xFFE91E63), // Rose
+    Color(0xFFF57C00), // Orange
+    Color(0xFF388E3C), // Forest Green
+    Color(0xFF1976D2), // Royal Blue
+  ];
+
+  'en': {
+      'welcome': 'Welcome to Bloom',
+      'subtitle': 'A safe space to grow your confidence.',
+      'start': 'Start My Journey',
+      'guest': 'Continue as Guest',
+      'progress': 'Your Growth Progress',
+      'choose_level': 'Choose your growth stage:',
+      'hello': 'Hello',
+      'profile': 'My Profile',
+      'history': 'My Growth Journey',
+      'reflect': 'Reflect on your growth',
+      'anxiety_q': 'How anxious did you feel? (1-10)',
+      'what_happened': 'What actually happened?',
+      'finish': 'Finish Reflection',
+      'streak': 'Current Streak',
+      'best': 'Best Streak',
+      'points': 'Confidence Points',
+      'level_seedling': 'Seedling',
+      'level_sprout': 'Sprout',
+      'level_leaf': 'Leaf',
+      'level_stem': 'Stem',
+      'level_bloom': 'Bloom',
+      'keep_growing': 'Keep growing, ',
+      'current_challenge': 'Your current challenge for this stage:',
+      'tap_to_start': 'Tap to start challenge',
+      'view_journey': 'View Growth Journey',
+      'stage_mastered': 'Stage Mastered!',
+      'all_done': 'You\'ve completed all challenges in this stage.',
+      'return_map': 'Return to Map',
+      'well_done': 'Well Done!',
+      'i_completed': 'I Completed This',
+      'write_experience_hint': 'Write about your experience...',
+      'stage_label': 'Stage: {0}',
+      'your_journey': 'Your Journey',
+      'keep_growing_sub': 'Every small step is a victory. Keep growing!',
+      'how_it_works': 'How does it work?',
+      'tap_to_view_journey': 'Tap to view your journey! 🌸',
+    },
+    'es': {
+      'welcome': 'Bienvenido a Bloom',
+      'subtitle': 'Un espacio seguro para crecer tu confianza.',
+      'start': 'Comenzar mi viaje',
+      'guest': 'Continuar como invitado',
+      'progress': 'Tu progreso de crecimiento',
+      'choose_level': 'Elige tu etapa de crecimiento:',
+      'hello': 'Hola',
+      'profile': 'Mi Perfil',
+      'history': 'Mi Viaje de Crecimiento',
+      'reflect': 'Reflexiona sobre tu crecimiento',
+      'anxiety_q': '¿Qué tan ansioso te sentiste? (1-10)',
+      'what_happened': '¿Qué pasó realmente?',
+      'finish': 'Terminar Reflexión',
+      'streak': 'Racha Actual',
+      'best': 'Mejor Racha',
+      'points': 'Puntos de confianza',
+      'level_seedling': 'Brotación',
+      'level_sprout': 'Brote',
+      'level_leaf': 'Hoja',
+      'level_stem': 'Tallo',
+      'level_bloom': 'Floración',
+      'keep_growing': 'Sigue creciendo, ',
+      'current_challenge': 'Tu desafío actual:',
+      'tap_to_start': 'Toca para empezar',
+      'view_journey': 'Ver Viaje',
+      'stage_mastered': '¡Etapa Dominada!',
+      'all_done': 'Has completado todos los retos.',
+      'return_map': 'Volver al Mapa',
+      'well_done': '¡Bien Hecho!',
+      'i_completed': 'Lo Completé',
+      'write_experience_hint': 'Escribe über deine Erfahrung...',
+      'stage_label': 'Stage: {0}',
+    },
+    'fr': {
+      'welcome': 'Bienvenue chez Bloom',
+      'subtitle': 'Un espace sûr pour développer votre confiance.',
+      'start': 'Commencer mon voyage',
+      'guest': 'Continuer en tant qu invité',
+      'progress': 'Votre progrès de croissance',
+      'choose_level': 'Choisissez votre étape de croissance :',
+      'hello': 'Bonjour',
+      'profile': 'Mon Profil',
+      'history': 'Mon Voyage de Croissance',
+      'reflect': 'Réfléchissez à votre croissance',
+      'anxiety_q': 'À quel point vous sentiez-vous anxieux ? (1-10)',
+      'what_happened': 'Que sest-il passé réellement ?',
+      'finish': 'Terminer la réflexion',
+      'streak': 'Série actuelle',
+      'best': 'Meilleure série',
+      'points': 'Points de confiance',
+      'level_seedling': 'Plantule',
+      'level_sprout': 'Pousse',
+      'level_leaf': 'Feuille',
+      'level_stem': 'Tige',
+      'level_bloom': 'Fleur',
+      'keep_growing': 'Continue à grandir, ',
+      'current_challenge': 'Votre défi actuel :',
+      'tap_to_start': 'Appuyez pour commencer',
+      'view_journey': 'Voir le Parcours',
+      'stage_mastered': 'Étape Maîtrisée !',
+      'all_done': 'Vous avez terminé tous les défis.',
+      'return_map': 'Retour à la Carte',
+      'well_done': 'Bien Joué !',
+      'i_completed': 'Terminé',
+      'write_experience_hint': 'Écrivez sur votre expérience...',
+      'stage_label': 'Stage: {0}',
+    },
+    'hi': {
+      'welcome': 'ब्लूम में आपका स्वागत है',
+      'subtitle': 'अपने आत्मविश्वास को बढ़ाने के लिए एक सुरक्षित स्थान।',
+      'start': 'मेरी यात्रा शुरू करें',
+      'guest': 'अतिथि के रूप में जारी रखें',
+      'progress': 'आपकी विकास प्रगति',
+      'choose_level': 'अपना विकास चरण चुनें:',
+      'hello': 'नमस्ते',
+      'profile': 'मेरी प्रोफाइल',
+      'history': 'मेरी विकास यात्रा',
+      'reflect': 'अपनी वृद्धि पर विचार करें',
+      'anxiety_q': 'आप कितना चिंतित महसूस कर रहे थे? (1-10)',
+      'what_happened': 'असल में क्या हुआ?',
+      'finish': 'चिंतन समाप्त करें',
+      'streak': 'वर्तमान सिलसिला',
+      'best': 'सर्वश्रेष्ठ सिलसिला',
+      'points': 'आत्मविश्वास अंक',
+      'level_seedling': 'अंकुर',
+      'level_sprout': 'अंकुरण',
+      'level_leaf': 'पत्ता',
+      'level_stem': 'तना',
+      'level_bloom': 'फूल',
+      'keep_growing': 'बढ़ते रहो, ',
+      'current_challenge': 'इस चरण के लिए आपकी वर्तमान चुनौती:',
+      'tap_to_start': 'शुरू करने के लिए टैप करें',
+      'view_journey': 'यात्रा देखें',
+      'stage_mastered': 'चरण पूर्ण!',
+      'all_done': 'आपने सभी चुनौतियाँ पूरी कर ली हैं।',
+      'return_map': 'मानचित्र पर लौटें',
+      'well_done': 'बहुत बढ़िया!',
+      'i_completed': 'मैंने पूरा किया',
+      'write_experience_hint': 'अपने अनुभव के बारे में लिखें...',
+      'stage_label': 'Stage: {0}',
+    },
+    'de': {
+      'welcome': 'Willkommen bei Bloom',
+      'subtitle': 'Ein sicherer Ort, um dein Selbstvertrauen zu stärken.',
+      'start': 'Meine Reise beginnen',
+      'guest': 'Als Gast fortfahren',
+      'progress': 'Dein Wachstumsfortschritt',
+      'choose_level': 'Wähle deine Wachstumsstufe:',
+      'hello': 'Hallo',
+      'profile': 'Mein Profil',
+      'history': 'Meine Wachstumsreise',
+      'reflect': 'Reflektiere dein Wachstum',
+      'anxiety_q': 'Wie ängstlich hast du dich gefühlt? (1-10)',
+      'what_happened': 'Was ist eigentlich passiert?',
+      'finish': 'Reflexion beenden',
+      'streak': 'Aktuelle Serie',
+      'best': 'Beste Serie',
+      'points': 'Vertrauenspunkte',
+      'level_seedling': 'Keimling',
+      'level_sprout': 'Spross',
+      'level_leaf': 'Blatt',
+      'level_stem': 'Stiel',
+      'level_bloom': 'Blüte',
+      'keep_growing': 'Wachse weiter, ',
+      'current_challenge': 'Deine aktuelle Herausforderung:',
+      'tap_to_start': 'Tippen zum Starten',
+      'view_journey': 'Reise ansehen',
+      'stage_mastered': 'Stufe gemeistert!',
+      'all_done': 'Du hast alle Herausforderungen gemeistert.',
+      'return_map': 'Zurück zur Karte',
+      'well_done': 'Gut gemacht!',
+      'i_completed': 'Erledigt',
+      'write_experience_hint': 'Schreibe über deine Erfahrung...',
+      'stage_label': 'Stage: {0}',
+    },
+
+    Future<void> _equipFreeze() async {
+    setState(() => _isLoading = true); // show spinner
+
+    try {
+      await UserService().equipFreeze(widget.user);
+      // ✅ Transaction succeeded – refresh data and show success
+      await _loadData(); // <-- make sure this returns Future<void>
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Freeze equipped!')));
+    } catch (e) {
+      // ❌ Transaction failed (condition not met or other error)
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('⚝ $e')));
+    } finally {
+      // ✅ Always reset the loading flag, even when an error occurs
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Widget theLoadingScreen() => const Center(child: CircularProgressIndicator());
