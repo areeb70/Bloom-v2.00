@@ -10,6 +10,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:url_launcher/url_launcher.dart'; // For launchUrl
 import 'package:flutter/services.dart'; // For Clipboard
+import 'package:flutter/cupertino.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -111,104 +112,215 @@ class GlobalSettings {
 }
 
 // --- ANIMATION WRAPPER ---
-class FadeScale extends StatefulWidget {
-  final Widget child;
-  const FadeScale({super.key, required this.child});
+// class FadeScale extends StatefulWidget {
+//   final Widget child;
+//   const FadeScale({super.key, required this.child});
+
+//   @override
+//   State<FadeScale> createState() => _FadeScaleState();
+// }
+
+// class _FadeScaleState extends State<FadeScale> {
+//   double _opacity = 0.0;
+//   double _scale = 0.95;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     Future.delayed(const Duration(milliseconds: 50), () {
+//       if (mounted)
+//         setState(() {
+//           _opacity = 1.0;
+//           _scale = 1.0;
+//         });
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return AnimatedOpacity(
+//       duration: const Duration(milliseconds: 600),
+//       opacity: _opacity,
+//       child: AnimatedScale(
+//         duration: const Duration(milliseconds: 600),
+//         scale: _scale,
+//         child: widget.child,
+//       ),
+//     );
+//   }
+// }
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<FadeScale> createState() => _FadeScaleState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _FadeScaleState extends State<FadeScale> {
-  double _opacity = 0.0;
-  double _scale = 0.95;
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  // Define animation intervals for a staggered sequence
+  late final Animation<double> _logoScaleAnim;
+  late final Animation<double> _logoFadeAnim;
+  late final Animation<Offset> _textSlideAnim;
+  late final Animation<double> _textFadeAnim;
+  late final Animation<double> _progressFadeAnim;
 
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 50), () {
-      if (mounted)
-        setState(() {
-          _opacity = 1.0;
-          _scale = 1.0;
-        });
-    });
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 600),
-      opacity: _opacity,
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 600),
-        scale: _scale,
-        child: widget.child,
-      ),
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1600), // Total sequence duration
+      vsync: this,
     );
-  }
-}
 
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({super.key});
+    // 1. Logo: Scale up with elastic curve (0.0s - 0.6s)
+    _logoScaleAnim = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
+    );
+    // Logo fade in slightly faster
+    _logoFadeAnim = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+    );
+
+    // 2. Text: Slide up + Fade in (0.4s - 1.0s)
+    _textSlideAnim =
+        Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.4, 0.9, curve: Curves.easeOutCubic),
+          ),
+        );
+    _textFadeAnim = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.4, 0.9, curve: Curves.easeOut),
+    );
+
+    // 3. Progress Bar: Fade in last (0.8s - 1.0s)
+    _progressFadeAnim = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.8, 1.0, curve: Curves.easeIn),
+    );
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Listen to BOTH theme color and language for instant updates
+    // Listen to theme/language for dynamic updates
     return ValueListenableBuilder<Color>(
       valueListenable: GlobalSettings.themeColor,
       builder: (context, themeColor, _) {
         return ValueListenableBuilder<String>(
           valueListenable: GlobalSettings.language,
           builder: (context, lang, _) {
-            // Get translated "Welcome" text
+            // Use Theme's surface color for solid background (fixes transition flash)
+            final surfaceColor = Theme.of(context).colorScheme.surface;
             final welcomeText = AppTexts.get('welcome', lang);
             final subtitleText = AppTexts.get('subtitle', lang);
 
             return Scaffold(
-              // Background reacts to theme color instantly
-              backgroundColor: themeColor,
+              backgroundColor:
+                  surfaceColor, // Solid background prevents transition flash
               body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // App Logo / Icon
-                    Icon(
-                      Icons.wb_sunny_rounded,
-                      size: 100,
-                      color: Colors.white,
+                    // 1. LOGO: Scale + Fade
+                    ScaleTransition(
+                      scale: _logoScaleAnim,
+                      child: FadeTransition(
+                        opacity: _logoFadeAnim,
+                        child: Icon(
+                          Icons.wb_sunny_rounded,
+                          size: 100,
+                          color: themeColor, // Use global theme color
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 24),
-                    // Translated Welcome Text
-                    Text(
-                      welcomeText,
-                      style: const TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'Georgia',
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    // Translated Subtitle
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40),
-                      child: Text(
-                        subtitleText,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withOpacity(0.9),
-                          fontFamily: 'Georgia',
+
+                    // 2. TEXT: Slide Up + Fade
+                    SlideTransition(
+                      position: _textSlideAnim,
+                      child: FadeTransition(
+                        opacity: _textFadeAnim,
+                        child: Column(
+                          children: [
+                            Text(
+                              AppTexts.get('welcome', lang),
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors
+                                    .white, // Splash uses themeColor background, so white text
+                                fontFamily: 'Georgia',
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 40,
+                              ),
+                              child: Text(
+                                AppTexts.get('subtitle', lang),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontFamily: 'Georgia',
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
-                        textAlign: TextAlign.center,
                       ),
                     ),
+
                     const SizedBox(height: 48),
-                    // Loading Indicator (White to match theme)
-                    const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 3,
+
+                    // 3. PROGRESS BAR: Fade In
+                    FadeTransition(
+                      opacity: _progressFadeAnim,
+                      child: SizedBox(
+                        width: 200,
+                        child: Column(
+                          children: [
+                            LinearProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                              backgroundColor: Colors.white.withOpacity(0.2),
+                              minHeight: 4,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              AppTexts.get(
+                                'loading',
+                                GlobalSettings.language.value,
+                              ), // Add 'loading' key to AppTexts
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white.withOpacity(0.8),
+                                fontFamily: 'Georgia',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -555,6 +667,8 @@ class AppTexts {
       'streak': 'Current Streak',
       'best': 'Best Streak',
       'points': 'Confidence Points',
+      //Splash Screen
+      'loading': 'Loading your garden...',
     },
     'es': {
       // Progress Screen
@@ -685,6 +799,8 @@ class AppTexts {
       'streak': 'Racha actual',
       'best': 'Mejor racha',
       'points': 'Puntos de confianza',
+      //Splash Screen
+      'loading': 'Cargando tu jardín...',
     },
     'fr': {
       // Progress Screen
@@ -815,6 +931,8 @@ class AppTexts {
       'streak': 'Série actuelle',
       'best': 'Meilleure série',
       'points': 'Points de confiance',
+      //Splash Screen
+      'loading': 'Chargement de votre jardin...',
     },
     'hi': {
       // Progress Screen
@@ -862,7 +980,7 @@ class AppTexts {
       'reset_everything': 'सब कुछ रीसेट करें',
       'reset_success': 'सभी प्रगति रीसेट हो गई है।',
       // Shop Screen
-      'shop_title': 'Bloom Shop',
+      'shop_title': 'ब्लूम शॉप',
       'your_points': 'आपके पॉइंट्स',
       'available_items': 'उपलब्ध आइटम',
       'streak_freeze': 'स्ट्र्रीक फ्रीज',
@@ -944,6 +1062,8 @@ class AppTexts {
       'streak': 'करंट स्ट्र्रीक',
       'best': 'सर्वश्रेष्ठ स्ट्र्रीक',
       'points': 'आत्मविश्वास पॉइंट्स',
+      //Splash Screen
+      'loading': 'आपका बगीचा लोड हो रहा है...',
     },
     'de': {
       // Progress Screen
@@ -1074,7 +1194,139 @@ class AppTexts {
       'streak': 'Aktuelle Strähne',
       'best': 'Beste Strähne',
       'points': 'Selbstvertrauen-Punkte',
-      'contact_us': 'Kontaktieren Sie uns',
+      //Splash Screen
+      'loading': 'Ihr Garten wird geladen...',
+    },
+    'ur': {
+      // Progress Screen
+      'your_journey': 'آپ کا سفر',
+      'keep_growing_sub': 'ہر چھوٹا قدم ایک فتح ہے۔ آگے بڑھتے رہیں!',
+      'how_it_works': 'یہ کیسے کام کرتا ہے؟',
+      'total_points': 'کل پوائنٹس',
+      'current_streak': 'موجودہ سٹریک',
+      'tasks_done': 'مکمل شدہ کام',
+      'rank': 'رینک',
+      'days': 'دن',
+      'contact_us': 'ہم سے رابطہ کریں',
+      'contact_email_prompt':
+          'سپورٹ اور فیڈ بیک کے لیے، ہمیں اس ای میل پر رابطہ کریں:',
+      'close': 'بند کریں',
+      // Level Map Screen
+      'tap_to_view_journey': 'اپنا سفر دیکھنے کے لیے ٹیپ کریں! 🌸',
+      'tap_to_start': 'چیلنج شروع کرنے کے لیے ٹیپ کریں',
+      'choose_level': 'اپنے ارتقاء کا مرحلہ منتخب کریں:',
+      'view_journey': 'ارتقائی سفر دیکھیں',
+      'progress': 'آپ کی ارتقائی ترقی',
+      'level_seedling': 'پودا',
+      'level_sprout': 'کونپل',
+      'level_leaf': 'پتا',
+      'level_stem': 'تنا',
+      'level_bloom': 'شگوفہ',
+      // Profile Screen
+      'account': 'اکاؤنٹ',
+      'display_name': 'ظاہری نام',
+      'save_name': 'نام محفوظ کریں',
+      'app_theme': 'ایپ تھیم',
+      'select_color': 'اپنا بلوم رنگ منتخب کریں:',
+      'light_mode': 'لائٹ',
+      'dark_mode': 'ڈارک',
+      'language': 'زبان',
+      'logout': 'لاگ آؤٹ',
+      'profile_updated': 'پروفائل اپ ڈیٹ ہو گئی!',
+      'pick_theme_color': 'تھیم کا رنگ منتخب کریں',
+      'done': 'مکمل',
+      'reset_all_progress': 'تمام ترقی ری سیٹ کریں',
+      'reset_confirm_title': 'کیا آپ کو یقین ہے؟',
+      'reset_confirm_message':
+          'اس سے آپ کا کانفیڈنس اسکور، سٹریک اور تمام ہسٹری مستقل طور پر حذف ہو جائے گی۔ اسے واپس نہیں لایا جا سکتا۔',
+      'cancel': 'منسوخ کریں',
+      'reset_everything': 'سب کچھ ری سیٹ کریں',
+      'reset_success': 'تمام ترقی ری سیٹ کر دی گئی ہے۔',
+      // Shop Screen
+      'shop_title': 'بلوم شاپ',
+      'your_points': 'آپ کے پوائنٹس',
+      'available_items': 'دستیاب اشیاء',
+      'streak_freeze': 'سٹریک فریز',
+      'protects_streak': 'سٹریک کو ری سیٹ ہونے سے بچاتا ہے',
+      'your_inventory': 'آپ کی انوینٹری',
+      'owned': 'ملکیت میں',
+      'equipped': 'لگا ہوا',
+      'equip_freeze': 'فریز لگی ہے',
+      'buy': 'خریدیں',
+      'freeze_purchased': 'فریز خرید لی گئی ہے!',
+      'not_enough_points': 'کافی پوائنٹس نہیں ہیں!',
+      'freeze_equipped': 'فریز لگا دی گئی ہے!',
+      // Milestone Screen
+      'your_growth_path': 'آپ کا ارتقائی راستہ',
+      'the_awakening': 'بیدار ہونا',
+      'seed_badge': 'بیج کا بیج',
+      'first_spark': 'پہلی چنگاری',
+      'bronze_leaf': 'کانسی کا پتا',
+      'social_courage': 'سماجی ہمت',
+      'silver_sprout': 'چاندی کی کونپل',
+      'confidence_bloom': 'اعتماد کا کھلنا',
+      'gold_flower': 'سونے کا پھول',
+      'mastery': 'مہارت',
+      'diamond_crown': 'ہیرے کا تاج',
+      // FAQ Screen
+      'help_faq': 'مدد اور عمومی سوالات',
+      'common_questions': 'عام سوالات',
+      'keep_blooming': 'کھلتے رہیں! 🌸',
+      'faq_q1': 'بلوم کیا ہے؟',
+      'faq_a1':
+          'بلوم ایک سیلف ہیلپ ٹول ہے جو لوگوں کی سماجی گھبراہٹ (سوشل اینگزائٹی) کو کم کرنے کے لیے ڈیزائن کیا گیا ہے، اس عمل کو \'گریڈڈ ایکسپوژر\' کہا جاتا ہے۔ چھوٹے اور آسان سماجی کاموں کو مکمل کر کے، آپ اپنے دماغ کو یہ سکھاتے ہیں کہ سماجی روابط محفوظ اور قابل انتظام ہیں۔',
+      'faq_q2': 'لیولز کیسے کام کرتے ہیں؟',
+      'faq_a2':
+          'ہم \'پودا\' (بہت آسان کاموں) سے شروع کرتے ہیں اور \'بلوم\' (زیادہ چیلنجنگ کاموں) تک جاتے ہیں۔ جیسے جیسے آپ کام مکمل کرتے ہیں، آپ اعتماد کے پوائنٹس حاصل کرتے ہیں۔ لیول جتنا اونچا ہوگا، آپ اتنے ہی زیادہ پوائنٹس کمائیں گے!',
+      'faq_q3': 'کانفیڈنس میٹر کیا ہے؟',
+      'faq_a3':
+          'آپ کی ہوم اسکرین پر موجود پروگریس بار آپ کے مجموعی اعتماد کی عکاسی کرتا ہے۔ یہ کاموں کو مکمل کرنے کے ساتھ ساتھ بڑھتا ہے۔ ہوشیار رہیں: اگر آپ کئی دنوں تک مشق بند کر دیتے ہیں، تو آپ کا کانفیڈنس اسکور تھوڑا کم ہو سکتا ہے، جو آپ کو یاد دلاتا ہے کہ اعتماد ایک مسل کی طرح ہے جسے باقاعدہ ورزش کی ضرورت ہوتی ہے!',
+      'faq_q4': 'سٹریک کیا ہے؟',
+      'faq_a4':
+          'سٹریک اس بات کی گنتی ہے کہ آپ نے لگاتار کتنے دن کم از کم ایک کام مکمل کیا ہے۔ گھبراہٹ پر قابو پانے کے لیے مستقل مزاجی ہی بنیادی ضرورت ہے، اس لیے اپنی شمع کو جلاتے رکھنے کی کوشش کریں!',
+      'faq_q5': 'میرا ڈیٹا کہاں محفوظ ہوتا ہے؟',
+      'faq_a5':
+          'آپ کی پرائیویسی ہماری ترجیح ہے۔ آپ کی تمام ترقی، ہسٹری اور پروفائل ڈیٹا مقامی طور پر آپ کے اپنے ڈیوائس پر محفوظ کیا جاتا ہے۔ کلاؤڈ سرور پر کچھ بھی اپ لوڈ نہیں کیا جاتا۔',
+      'faq_q6': 'اگر ایپ کریش ہو جائے تو میں کیا کروں؟',
+      'faq_a6':
+          'اگر ایپ کا رویہ عجیب ہو تو اپنا فون ری اسٹارٹ کرنے کی کوشش کریں۔ اگر آپ نے ایپ اپ ڈیٹ کی ہے، تو آپ کو اپنی اینڈرائیڈ سیٹنگز میں ایپ کیشے (Cache) کلیئر کرنے کی ضرورت پڑ سکتی ہے۔ اگر کچھ بھی کام نہ کرے، تو آپ اپنی پروفائل میں \'تمام ترقی ری سیٹ کریں\' کا آپشن استعمال کر سکتے ہیں۔',
+      'faq_q7': 'کیا میں لیولز چھوڑ (Skip) سکتا ہوں؟',
+      'faq_a7':
+          'جی ہاں! اگرچہ ہم بتدریج راستے کی سفارش کرتے ہیں، لیکن آپ نقشے سے کوئی بھی لیول منتخب کرنے کے لیے آزاد ہیں جو آپ کے موجودہ کمفرٹ لیول کے مطابق ہو۔',
+      'faq_q8': 'اگر کام بہت مشکل ہو تو کیا ہوگا؟',
+      'faq_a8':
+          'اگرچہ ہم آپ کو کام مکمل کرنے کی کوشش کرنے کا مشورہ دیتے ہیں، لیکن آپ صرف ہوم اسکرین پر واپس جا سکتے ہیں، اور موجودہ کام کو تبدیل کرنے کے لیے دوبارہ داخل ہو سکتے ہیں۔',
+      'faq_q9': 'ہم سے رابطہ کریں',
+      'faq_a9':
+          'ہم اپنے صارفین سے ایپ کے بارے میں سننا اور مستقبل کی اپ ڈیٹس کے لیے تجاویز حاصل کرنا پسند کریں گے۔ ہمیں یہ جان کر خوشی ہوگی کہ ایپ صارفین کے لیے کتنی اچھی کارکردگی دکھا رہی ہے، اور اس میں کس چیز کی کمی ہے اور کہاں بہتری کی ضرورت ہے۔ براہ کرم feedback.bloom@gmail.com پر اپنی رائے شیئر کرنے میں ہچکچاہٹ محسوس نہ کریں، ہم واقعی اس کی تعریف کریں گے۔',
+      // Task Screen
+      'stage_label': 'مرحلہ: {0}',
+      'keep_growing': 'آگے بڑھتے رہیں، {0}',
+      'current_challenge': 'اس مرحلے کے لیے آپ کا موجودہ چیلنج:',
+      'stage_mastered': 'مرحلہ مکمل ہوا!',
+      'all_done': 'آپ نے اس مرحلے کے تمام چیلنجز مکمل کر لیے ہیں۔',
+      'return_map': 'نقشے پر واپس جائیں',
+      'well_done': 'بہت خوب!',
+      'i_completed': 'میں نے یہ مکمل کر لیا',
+      // Reflection Screen
+      'reflect': 'اپنی ترقی پر غور کریں',
+      'anxiety_q': 'آپ نے کتنی گھبراہٹ محسوس کی؟ (1-10)',
+      'what_happened': 'اصل میں کیا ہوا تھا؟',
+      'write_experience_hint': 'اپنے تجربے کے بارے میں لکھیں...',
+      'finish': 'غور و فکر مکمل کریں',
+      // General / Auth
+      'welcome': 'بلوم میں خوش آمدید',
+      'subtitle': 'آپ کے اعتماد کو بڑھانے کے لیے ایک محفوظ جگہ۔',
+      'start': 'میرا سفر شروع کریں',
+      'guest': 'بطور مہمان جاری رکھیں',
+      'hello': 'ہیلو',
+      'profile': 'میری پروفائل',
+      'history': 'میرا ارتقائی سفر',
+      'streak': 'موجودہ سٹریک',
+      'best': 'بہترین سٹریک',
+      'points': 'کانفیڈنس پوائنٹس',
+      //Splash Screen
+      'loading': 'آپ کا باغ لوڈ ہو رہا ہے...',
     },
   };
 
@@ -4023,6 +4275,590 @@ class TaskLibrary {
         },
       ],
     },
+    'ur': {
+      "Seedling": [
+        {
+          "id": "S1",
+          "title": "پہلا قدم",
+          "desc": "آج کسی ایک شخص سے نظریں ملائیں اور مسکرائیں۔",
+        },
+        {
+          "id": "S2",
+          "title": "ایک سادہ ہیلو",
+          "desc": "کسی پڑوسی کو 'گڈ مارننگ' یا 'ہیلو' کہیں۔",
+        },
+        {
+          "id": "S3",
+          "title": "شکریہ ادا کرنا",
+          "desc": "کسی دکاندار کو واضح طور پر 'شکریہ' کہیں۔",
+        },
+        {
+          "id": "S4",
+          "title": "مشاہدہ کرنا",
+          "desc": "کسی اجنبی میں کوئی مثبت چیز نوٹ کریں اور مسکرائیں۔",
+        },
+        {
+          "id": "S5",
+          "title": "خاموشی سے ہاتھ ہلانا",
+          "desc": "دور سے کسی ایسے شخص کو ہاتھ ہلائیں جسے آپ پہچانتے ہوں۔",
+        },
+        {
+          "id": "S6",
+          "title": "دروازہ کھلا رکھنا",
+          "desc": "اپنے پیچھے آنے والے کسی شخص کے لیے دروازہ کھلا رکھیں۔",
+        },
+        {
+          "id": "S7",
+          "title": "سر ہلانا",
+          "desc":
+              "کسی ساتھی کے پاس سے گزرتے ہوئے اسے دوستانہ انداز میں سر ہلا کر سلام کریں۔",
+        },
+        {
+          "id": "S8",
+          "title": "آئینہ",
+          "desc":
+              "آئینے کے سامنے کھڑے ہو کر 1 منٹ تک اپنی 'پر اعتماد مسکراہٹ' کی مشق کریں۔",
+        },
+        {
+          "id": "S9",
+          "title": "مختصر نظر",
+          "desc":
+              "کسی کو 2 سیکنڈ کے لیے دیکھیں، پھر مسکرائیں اور نظریں ہٹا لیں۔",
+        },
+        {
+          "id": "S10",
+          "title": "خاموشی سے تعریف",
+          "desc": "کسی کی سوشل میڈیا پوسٹ پر ایک اچھا تبصرہ لکھیں۔",
+        },
+        {
+          "id": "S11",
+          "title": "جگہ شیئر کرنا",
+          "desc":
+              "کسی عوامی جگہ پر کسی کے پاس بیٹھ جائیں اور فوراً نظریں نہ ہٹائیں۔",
+        },
+        {
+          "id": "S12",
+          "title": "سادہ اعتراف",
+          "desc":
+              "راہداری میں کسی کے پاس سے گزرتے وقت شائستگی سے 'ایکسکیوز می' کہیں۔",
+        },
+        {
+          "id": "S13",
+          "title": "گرم جوش استقبال",
+          "desc": "کسی ڈیلیوری ڈرائیور یا کورئیر کو 'ہائے' کہیں۔",
+        },
+        {
+          "id": "S14",
+          "title": "چھوٹا سا اشارہ",
+          "desc": "کسی بچے یا پالتو جانور کو ہاتھ ہلائیں (مالک کی اجازت سے)۔",
+        },
+        {
+          "id": "S15",
+          "title": "نرم مسکراہٹ",
+          "desc": "آج تین الگ الگ لوگوں کو دیکھ کر مسکرائیں۔",
+        },
+        {
+          "id": "S16",
+          "title": "آئی کانٹیکٹ چیلنج",
+          "desc":
+              "کیشیئر سے اس وقت تک نظریں ملائے رکھیں جب تک وہ خود پہلے نظر نہ ہٹا لے۔",
+        },
+        {
+          "id": "S17",
+          "title": "آرام سے سانس لینا",
+          "desc": "آج کسی بھی سماجی جگہ میں داخل ہونے سے پہلے 3 گہرے سانس لیں۔",
+        },
+        {
+          "id": "S18",
+          "title": "موجودگی",
+          "desc":
+              "اپنے فون کو دیکھے بغیر 5 منٹ تک کسی پرہجوم جگہ پر کھڑے رہیں۔",
+        },
+        {
+          "id": "S19",
+          "title": "سر کا اشارہ",
+          "desc": "کسی ایسے اجنبی کو دیکھ کر سر ہلائیں جو آپ سے نظریں ملائے۔",
+        },
+        {
+          "id": "S20",
+          "title": "نرم آواز",
+          "desc": "کسی دکان سے نکلتے وقت کسی کو 'آپ کا دن اچھا گزرے' کہیں۔",
+        },
+      ],
+      "Sprout": [
+        {
+          "id": "SP1",
+          "title": "تعریف کرنا",
+          "desc": "اپنے کسی ساتھی یا ہم جماعت کی سچی اور دلی تعریف کریں۔",
+        },
+        {
+          "id": "SP2",
+          "title": "سوال پوچھنا",
+          "desc": "کسی اجنبی سے وقت یا راستے کے بارے میں پوچھیں۔",
+        },
+        {
+          "id": "SP3",
+          "title": "مختصر گفتگو",
+          "desc":
+              "کسی سے پوچھیں 'آپ کا دن کیسا گزر رہا ہے؟' اور اس کا جواب غور سے سنیں۔",
+        },
+        {
+          "id": "SP4",
+          "title": "درخواست کرنا",
+          "desc":
+              "دکان کے کسی ملازم سے کسی مخصوص چیز کو ڈھونڈنے میں مدد مانگیں۔",
+        },
+        {
+          "id": "SP5",
+          "title": "آرڈر دینا",
+          "desc":
+              "کسی کھانے یا پینے کی چیز کا آرڈر دیں اور عملے سے پوچھیں کہ وہ کیسے ہیں۔",
+        },
+        {
+          "id": "SP6",
+          "title": "سلام دعا",
+          "desc": "اپنے علاقے میں کسی نئے شخص سے اپنا تعارف کروائیں۔",
+        },
+        {
+          "id": "SP7",
+          "title": "موسم کی بات چیت",
+          "desc":
+              "لائن میں کھڑے ہو کر انتظار کے دوران کسی سے موسم کا تذکرہ کریں۔",
+        },
+        {
+          "id": "SP8",
+          "title": "سادہ پوچھ گچھ",
+          "desc":
+              "اپنے ساتھ کام کرنے والے سے پوچھیں 'آپ نے ویک اینڈ پر کیا کیا؟'",
+        },
+        {
+          "id": "SP9",
+          "title": "مدد کی پیشکش",
+          "desc":
+              "اگر کوئی پریشان یا مشکل میں نظر آئے تو اس سے پوچھیں 'کیا آپ کو اس میں مدد کی ضرورت ہے؟'۔",
+        },
+        {
+          "id": "SP10",
+          "title": "رائے مانگنا",
+          "desc":
+              "کسی دوست کو کوئی چھوٹی چیز دکھا کر پوچھیں 'آپ کا اس کے بارے میں کیا خیال ہے؟'۔",
+        },
+        {
+          "id": "SP11",
+          "title": "تصدیق کرنا",
+          "desc":
+              "کسی اجنبی سے کسی بات کی تصدیق کریں (جیسے کہ، 'کیا یہ صحیح لائن ہے؟')۔",
+        },
+        {
+          "id": "SP12",
+          "title": "مشترکہ جگہ",
+          "desc":
+              "ماحول کے بارے میں ایک چھوٹا سا تبصرہ کریں (جیسے کہ، 'یہاں واقعی بہت رش ہے')۔",
+        },
+        {
+          "id": "SP13",
+          "title": "چھوٹا سا کام",
+          "desc":
+              "ٹیبل پر بیٹھے ہوئے کسی سے کوئی چیز (جیسے نیپکن) اپنی طرف بڑھانے کا کہیں۔",
+        },
+        {
+          "id": "SP14",
+          "title": "اچھا فیڈ بیک",
+          "desc": "جانے سے پہلے ویٹر کو بتائیں کہ کھانا بہت لاجواب تھا۔",
+        },
+        {
+          "id": "SP15",
+          "title": "خیریت معلوم کرنا",
+          "desc":
+              "کسی ایسے شخص کو 'آپ کیسے ہیں؟' کا میسج بھیجیں جس سے آپ نے ایک مہینے سے بات نہ کی ہو۔",
+        },
+        {
+          "id": "SP16",
+          "title": "کھلا سوال",
+          "desc":
+              "کسی سے پوچھیں 'اس شہر میں آپ کی سب سے پسندیدہ گھومنے والی جگہ کون سی ہے؟'۔",
+        },
+        {
+          "id": "SP17",
+          "title": "سب سے چھوٹا رسک",
+          "desc":
+              "کسی اجنبی سے پوچھیں کہ کیا وہ جانتے ہیں کہ سب سے قریبی واش روم کہاں ہے۔",
+        },
+        {
+          "id": "SP18",
+          "title": "چیزوں کی تعریف",
+          "desc": "کسی کو بتائیں کہ آپ کو ان کے جوتے/بیگ/ایکسیسری پسند آئی ہے۔",
+        },
+        {
+          "id": "SP19",
+          "title": "شائستہ وقفہ",
+          "desc":
+              "کسی کو جواب دینے سے پہلے اس کی بات مکمل طور پر ختم ہونے کا انتظار کریں۔",
+        },
+        {
+          "id": "SP20",
+          "title": "دوستانہ الوداع",
+          "desc":
+              "کسی ایسے شخص کو ہاتھ ہلائیں اور 'بائے' کہیں جس کے ساتھ ابھی آپ کی مختصر سی بات چیت ہوئی ہو۔",
+        },
+      ],
+      "Leaf": [
+        {
+          "id": "L1",
+          "title": "رائے مانگنے والا",
+          "desc": "کسی سے کسی کتاب، فلم یا گانے پر ان کی رائے پوچھیں۔",
+        },
+        {
+          "id": "L2",
+          "title": "تفصیل",
+          "desc":
+              "جب کوئی آپ کو اپنے بارے میں کچھ بتائے تو اس سے متعلق ایک مزید سوال پوچھیں۔",
+        },
+        {
+          "id": "L3",
+          "title": "سفارش",
+          "desc": "کسی اجنبی سے قریب ہی کھانے کی کسی اچھی جگہ کی سفارش پوچھیں۔",
+        },
+        {
+          "id": "L4",
+          "title": "مشترکہ تعلق",
+          "desc":
+              "کسی کے ساتھ کوئی مشترکہ دلچسپی تلاش کریں اور اس پر 2 منٹ تک بات کریں۔",
+        },
+        {
+          "id": "L5",
+          "title": "مددگار ہاتھ",
+          "desc":
+              "کسی چھوٹے کام میں مدد کی پیشکش کریں (جیسے کہ سامان کا تھیلا اٹھانا)۔",
+        },
+        {
+          "id": "L6",
+          "title": "سماجی مشاہدہ",
+          "desc":
+              "آپ دونوں کے ارد گرد ہونے والے کسی واقعے کو بنیاد بنا کر گفتگو کا آغاز کریں۔",
+        },
+        {
+          "id": "L7",
+          "title": "کھلا سوال",
+          "desc": "کسی سے پوچھیں 'آپ اس پیشے یا کام میں کیسے آئے؟'۔",
+        },
+        {
+          "id": "L8",
+          "title": "سرگرم سامع",
+          "desc":
+              "کسی کی بات بغیر مداخلت کے 3 منٹ تک سنیں، پھر انہوں نے جو کہا اس کا خلاصہ کریں۔",
+        },
+        {
+          "id": "L9",
+          "title": "مشترکہ ہنسی",
+          "desc": "کسی چھوٹے گروپ کو ایک مختصر، مزاحیہ کہانی یا لطیفہ سنائیں۔",
+        },
+        {
+          "id": "L10",
+          "title": "تجسس",
+          "desc":
+              "کسی سے پوچھیں کہ ان کا تعلق کہاں سے ہے اور انہیں اس جگہ کے بارے میں کیا پسند ہے۔",
+        },
+        {
+          "id": "L11",
+          "title": "سچی دلچسپی",
+          "desc": "کسی ساتھی سے کام کے علاوہ ان کے مشاغل کے بارے میں پوچھیں۔",
+        },
+        {
+          "id": "L12",
+          "title": "نرم مشورہ",
+          "desc":
+              "جس چیز میں آپ ماہر ہوں، اس کے بارے میں کسی کو ایک مفید معلوماتی ٹپ دیں۔",
+        },
+        {
+          "id": "L13",
+          "title": "گروپ میں تائید",
+          "desc":
+              "کسی چھوٹے گروپ کی گفتگو میں کسی کی بات سے سر ہلا کر اتفاق کریں۔",
+        },
+        {
+          "id": "L14",
+          "title": "غیر رسمی دعوت",
+          "desc":
+              "کسی سے پوچھیں 'کیا آپ لنچ میں ہمارے ساتھ شامل ہونا چاہیں گے؟'۔",
+        },
+        {
+          "id": "L15",
+          "title": "سچا اظہار",
+          "desc":
+              "کسی کو بتائیں 'جب آپ نے ایکس (X) کیا تو مجھے واقعی بہت اچھا لگا تھا' اور اس کی وجہ بتائیں۔",
+        },
+        {
+          "id": "L16",
+          "title": "تجسس کا فاصلہ",
+          "desc":
+              "کسی سے پوچھیں 'میں ہمیشہ سوچتا ہوں کہ ایکس (X) اصل میں کیسے کام کرتا ہے؟'۔",
+        },
+        {
+          "id": "L17",
+          "title": "گروپ گفتگو کی شروعات",
+          "desc":
+              "ایسا سوال پوچھیں جس کا جواب دینے کے لیے گروپ میں 2 یا 3 لوگوں کی ضرورت ہو۔",
+        },
+        {
+          "id": "L18",
+          "title": "سچی تعریف",
+          "desc":
+              "کسی کی شخصیت کی خوبی پر ان کی تعریف کریں (جیسے کہ، 'آپ ایک بہت اچھے سننے والے ہیں')۔",
+        },
+        {
+          "id": "L19",
+          "title": "مشترکہ تجربہ",
+          "desc": "گفتگو کے دوران کہیں 'میں بھی اس صورتحال سے گزر چکا ہوں'۔",
+        },
+        {
+          "id": "L20",
+          "title": "بامعنی وقفہ",
+          "desc":
+              "گفتگو میں خاموشی کے لمحے کو برقرار رہنے دیں اور اسے فوراً ختم کرنے کی جلدی نہ کریں۔",
+        },
+      ],
+      "Stem": [
+        {
+          "id": "ST1",
+          "title": "بہادرانہ شروعات",
+          "desc":
+              "کسی ایسے شخص کے ساتھ گفتگو شروع کریں جسے آپ اچھی طرح نہیں جانتے۔",
+        },
+        {
+          "id": "ST2",
+          "title": "سچا اشتراک",
+          "desc": "کسی گروپ میں اپنی کوئی چھوٹی ذاتی کہانی یا رائے شیئر کریں۔",
+        },
+        {
+          "id": "ST3",
+          "title": "بحث و تکرار",
+          "desc": "کسی کی رائے سے شائستگی سے اختلاف کریں اور اس کی وجہ بتائیں۔",
+        },
+        {
+          "id": "ST4",
+          "title": "گروپ میں شمولیت",
+          "desc":
+              "کسی گروپ کی گفتگو میں شامل ہوں اور ایک سوچا سمجھا جملہ اس میں پیش کریں۔",
+        },
+        {
+          "id": "ST5",
+          "title": "موضوع کی رہنمائی",
+          "desc": "کسی سماجی گروپ میں گفتگو کے لیے ایک نیا موضوع پیش کریں۔",
+        },
+        {
+          "id": "ST6",
+          "title": "عوامی سوال",
+          "desc": "کسی عوامی میٹنگ یا کلاس روم کے ماحول میں سوال پوچھیں۔",
+        },
+        {
+          "id": "ST7",
+          "title": "جرأت مندانہ درخواست",
+          "desc":
+              "کسی اجنبی سے پوچھیں کہ کیا آپ کسی کیفے یا پارک میں ان کے ساتھ بیٹھ سکتے ہیں۔",
+        },
+        {
+          "id": "ST8",
+          "title": "گفتگو کا پل",
+          "desc":
+              "دو ایسے لوگوں کا ایک دوسرے سے تعارف کروائیں جو ایک دوسرے کو نہیں جانتے اور ان میں کوئی مشترکہ بات ڈھونڈیں۔",
+        },
+        {
+          "id": "ST9",
+          "title": "واضح ضرورت",
+          "desc":
+              "کسی سے شائستگی سے کہیں کہ وہ ہٹ جائیں یا کوئی ایسا کام بند کر دیں جو آپ کو پریشان کر رہا ہو۔",
+        },
+        {
+          "id": "ST10",
+          "title": "قصہ گو",
+          "desc":
+              "3 یا اس سے زیادہ لوگوں کے گروپ کو کوئی کہانی سنانے میں پہل کریں۔",
+        },
+        {
+          "id": "ST11",
+          "title": "کھلا چیلنج",
+          "desc":
+              "کسی گروپ میں ایک عام رائے کو دوستانہ اور احترام کے دائرے میں رہ کر چیلنج کریں۔",
+        },
+        {
+          "id": "ST12",
+          "title": "سماجی پہل",
+          "desc":
+              "کسی کمرے میں داخل ہوتے وقت سب کو سب سے پہلے 'ہیلو' کہنے والے شخص بنیں۔",
+        },
+        {
+          "id": "ST13",
+          "title": "ہمدردانہ سماعت",
+          "desc":
+              "کسی کی پریشانی یا غصے کی باتیں غور سے سنیں اور اس کا ایک معاون جواب دیں۔",
+        },
+        {
+          "id": "ST14",
+          "title": "عوامی پیشکش",
+          "desc":
+              "کسی سماجی اجتماع میں اپنے پسندیدہ موضوع پر 1 سے 2 منٹ تک گفتگو کریں۔",
+        },
+        {
+          "id": "ST15",
+          "title": "کمزوری کا اعتراف",
+          "desc":
+              "کسی گروپ کے سامنے اعتراف کریں کہ آپ کسی چیز کے بارے میں گھبرا رہے تھے، اور مل کر اس پر ہنسیں۔",
+        },
+        {
+          "id": "ST16",
+          "title": "حدود کا تعین",
+          "desc":
+              "کسی ایسی دعوت کو جہاں آپ جانا نہیں چاہتے، بغیر کسی لمبی وضاحت کے شائستگی سے معذرت کر لیں۔",
+        },
+        {
+          "id": "ST17",
+          "title": "سرگرم ثالث",
+          "desc":
+              "کسی اختلاف یا بحث میں دو لوگوں کو کسی درمیانی راستے پر لانے میں مدد کریں۔",
+        },
+        {
+          "id": "ST18",
+          "title": "عوامی تعریف",
+          "desc":
+              "کسی گروپ میں علانیہ طور پر کسی کی کوشش یا کامیابی کی تعریف کریں۔",
+        },
+        {
+          "id": "ST19",
+          "title": "براہ راست نقطہ نظر",
+          "desc":
+              "کسی سے براہ راست کسی مدد یا مشورے کی درخواست کریں جس کی آپ کو ضرورت ہو۔",
+        },
+        {
+          "id": "ST20",
+          "title": "گفتگو کا رخ موڑنا",
+          "desc":
+              "کسی گفتگو کو بورنگ موضوع سے کسی دلچسپ موضوع کی طرف آسانی سے منتقل کریں۔",
+        },
+      ],
+      "Bloom": [
+        {
+          "id": "B1",
+          "title": "تحفہ",
+          "desc":
+              "کسی کو کوئی چھوٹی سی چیز یا کھانے پینے کی چیز دیں اور کہیں 'میں نے سوچا آپ کو یہ پسند آئے گا'۔",
+        },
+        {
+          "id": "B2",
+          "title": "جرأت مندانہ قیادت",
+          "desc":
+              "لوگوں کے ایک چھوٹے سے گروپ کو کسی جگہ جانے یا کسی منصوبے کی تجویز دیں۔",
+        },
+        {
+          "id": "B3",
+          "title": "قدردانی",
+          "desc":
+              "کسی کو خاص طور پر بتائیں کہ آپ ان کا اپنی زندگی میں ہونا کیوں پسند اور قدر کرتے ہیں۔",
+        },
+        {
+          "id": "B4",
+          "title": "سماجی میزبان",
+          "desc":
+              "کچھ لوگوں کے لیے ایک چھوٹی سی ملاقات یا کافی ڈیٹ کا اہتمام کریں۔",
+        },
+        {
+          "id": "B5",
+          "title": "گہری گفتگو",
+          "desc":
+              "کسی کے ساتھ 15 منٹ سے زیادہ دیر تک گہری اور معنی خیز گفتگو کریں۔",
+        },
+        {
+          "id": "B6",
+          "title": "اعتماد کی چوٹی",
+          "desc":
+              "کسی ایسے شخص کے ساتھ بات چیت شروع کریں جس سے آپ مرعوب یا خوفزدہ ہوتے ہوں۔",
+        },
+        {
+          "id": "B7",
+          "title": "علانیہ تحسین",
+          "desc":
+              "کسی گروپ میں کسی شخص کے لیے ایک مختصر، مثبت تعریفی کلمات کہیں یا ان کی کوشش کو سراہیں۔",
+        },
+        {
+          "id": "B8",
+          "title": "حدود کا تعین کرنے والا",
+          "desc":
+              "بغیر کسی لمبی وضاحت کے، کسی فرمائش یا درخواست پر مضبوطی مگر نرمی سے 'ناں' کہیں۔",
+        },
+        {
+          "id": "B9",
+          "title": "براہ راست درخواست",
+          "desc":
+              "کسی ایسے شخص سے جس کی آپ تعریف کرتے ہیں، 10 منٹ کی بات چیت یا رہنمائی کی درخواست کریں۔",
+        },
+        {
+          "id": "B10",
+          "title": "جذباتی پہل",
+          "desc":
+              "اپنے کسی دوست کے ساتھ جذبات یا ذہنی صحت کے موضوع پر بات چیت کا آغاز کریں۔",
+        },
+        {
+          "id": "B11",
+          "title": "سماجی ثالث",
+          "desc":
+              "پرسکون گفتگو کے ذریعے دو لوگوں کے درمیان ایک چھوٹے سے تنازع کو حل کرنے میں مدد کریں۔",
+        },
+        {
+          "id": "B12",
+          "title": "بہادرانہ تعریف",
+          "desc":
+              "کسی بالکل اجنبی شخص کو کوئی ایسی بات بتائیں جو آپ واقعی ان میں پسند یا رشک کرتے ہوں۔",
+        },
+        {
+          "id": "B13",
+          "title": "نیٹ ورکنگ قدم",
+          "desc":
+              "اپنے شعبے کے کسی ماہر یا پیشہ ور شخص سے اپنا تعارف کروائیں اور ان سے مشورہ مانگیں۔",
+        },
+        {
+          "id": "B14",
+          "title": "حوصلہ مندانہ سچائی",
+          "desc":
+              "کسی کو کوئی ایسی سچائی بتائیں جو کہنی مشکل ہو لیکن رشتے یا تعلق کے لیے فائدہ مند ہو۔",
+        },
+        {
+          "id": "B15",
+          "title": "کامل کھلنا",
+          "desc":
+              "ایک چھوٹی سی سماجی تقریب کی ميزبانی کریں اور اس بات کو یقینی بنائیں کہ ہر مہمان خوش آئند محسوس کرے۔",
+        },
+        {
+          "id": "B16",
+          "title": "عوامی مقرر",
+          "desc":
+              "کسی میٹنگ یا تقریب کے ایک چھوٹے سے حصے کی صدارت کرنے یا بولنے کے لیے خود رضاکارانہ پیش کریں۔",
+        },
+        {
+          "id": "B17",
+          "title": "کمزوری کے ساتھ رہنمائی",
+          "desc":
+              "کسی دوسرے کی حوصلہ افزائی کے لیے اپنی کسی ایسی مشکل یا آزمائش کو شیئر کریں جس پر آپ نے قابو پا لیا ہو۔",
+        },
+        {
+          "id": "B18",
+          "title": "بہادرانہ معذرت",
+          "desc":
+              "ماضی کی کسی غلطی پر معافی مانگنے کے لیے گفتگو کی پہل کریں، چاہے وہ کتنی ہی پرانی بات کیوں نہ ہو۔",
+        },
+        {
+          "id": "B19",
+          "title": "رہنما (مینٹر)",
+          "desc":
+              "کسی ایسے شخص کو کسی مہارت یا ہنر میں مدد کی پیشکش کریں جو آپ سے کم تجربہ کار ہو۔",
+        },
+        {
+          "id": "B20",
+          "title": "سماجی معمار",
+          "desc":
+              "دوستوں کے ایک گروپ کے لیے ایک نئی سماجی روایت یا بار بار ہونے والی ملاقات (میٹ اپ) کا آغاز کریں۔",
+        },
+      ],
+    },
   };
   static List<Map<String, String>> getTasks(String level, String lang) =>
       translations[lang]?[level] ?? translations['en']![level]!;
@@ -4304,13 +5140,13 @@ class BloomApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<Color>(
       valueListenable: GlobalSettings.themeColor,
       builder: (context, color, _) {
-        return ValueListenableBuilder(
+        return ValueListenableBuilder<ThemeMode>(
           valueListenable: GlobalSettings.themeMode,
           builder: (context, mode, _) {
-            return ValueListenableBuilder(
+            return ValueListenableBuilder<String>(
               valueListenable: GlobalSettings.language,
               builder: (context, lang, _) {
                 return MaterialApp(
@@ -4322,7 +5158,30 @@ class BloomApp extends StatelessWidget {
                     ),
                     useMaterial3: true,
                     fontFamily: 'Georgia',
+                    pageTransitionsTheme: const PageTransitionsTheme(
+                      builders: <TargetPlatform, PageTransitionsBuilder>{
+                        TargetPlatform.android:
+                            CupertinoPageTransitionsBuilder(),
+                        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+                        TargetPlatform.windows:
+                            FadeUpwardsPageTransitionsBuilder(),
+                        TargetPlatform.linux:
+                            FadeUpwardsPageTransitionsBuilder(),
+                      },
+                    ),
+                    // SOLID BACKGROUNDS (Fixes "background moving out" glitch)
+                    scaffoldBackgroundColor: ColorScheme.fromSeed(
+                      seedColor: color,
+                      brightness: Brightness.light,
+                    ).surface,
+                    canvasColor: ColorScheme.fromSeed(
+                      seedColor: color,
+                      brightness: Brightness.light,
+                    ).surface,
+                    // Removed duplicate useMaterial3/fontFamily
                   ),
+
                   darkTheme: ThemeData(
                     colorScheme: ColorScheme.fromSeed(
                       seedColor: color,
@@ -4330,17 +5189,33 @@ class BloomApp extends StatelessWidget {
                     ),
                     useMaterial3: true,
                     fontFamily: 'Georgia',
+                    pageTransitionsTheme: const PageTransitionsTheme(
+                      builders: <TargetPlatform, PageTransitionsBuilder>{
+                        TargetPlatform.android:
+                            CupertinoPageTransitionsBuilder(),
+                        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+                        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+                        TargetPlatform.windows:
+                            FadeUpwardsPageTransitionsBuilder(),
+                        TargetPlatform.linux:
+                            FadeUpwardsPageTransitionsBuilder(),
+                      },
+                    ),
+                    // SOLID BACKGROUNDS (DARK MODE)
+                    scaffoldBackgroundColor: ColorScheme.fromSeed(
+                      seedColor: color,
+                      brightness: Brightness.dark,
+                    ).surface,
+                    canvasColor: ColorScheme.fromSeed(
+                      seedColor: color,
+                      brightness: Brightness.dark,
+                    ).surface,
                   ),
                   themeMode: mode,
-                  // 👇 THIS IS THE MAGIC LINE
                   builder: (context, child) {
-                    // This wraps EVERY screen in the app
-                    return ValueListenableBuilder(
+                    return ValueListenableBuilder<String>(
                       valueListenable: GlobalSettings.language,
-                      builder: (context, _, __) {
-                        // Force the current screen to rebuild when language changes
-                        return child!;
-                      },
+                      builder: (context, _, __) => child!,
                     );
                   },
                   home: const AuthWrapper(),
@@ -4561,7 +5436,9 @@ class _AuthScreenState extends State<AuthScreen> {
           if (_isLoading)
             Positioned.fill(
               child: Container(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+                color: Theme.of(context).colorScheme.surface.withOpacity(
+                  0.8,
+                ), // Semi-transparent solid
                 child: Center(
                   child: Container(
                     padding: const EdgeInsets.all(30),
@@ -4629,11 +5506,11 @@ class _LevelMapScreenState extends State<LevelMapScreen> {
   Widget build(BuildContext context) {
     // 1. Scaffold is ROOT. It never rebuilds unnecessarily.
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      // backgroundColor: Theme.of(context).colorScheme.surface,
 
       // 2. AppBar Title: Listen to BOTH Language + UserProfile
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        // backgroundColor: Colors.transparent,
         elevation: 0,
         title: ValueListenableBuilder<String>(
           valueListenable: GlobalSettings.language,
@@ -4704,168 +5581,156 @@ class _LevelMapScreenState extends State<LevelMapScreen> {
               double score = (data['confidenceScore'] ?? 0).toDouble();
               double progress = (score / 100).clamp(0.0, 1.0);
 
-              return FadeScale(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0,
-                    vertical: 10,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      // Growth Gauge
-                      GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => MilestoneScreen(user: widget.user),
-                          ),
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 10,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Growth Gauge
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MilestoneScreen(user: widget.user),
                         ),
-                        child: Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Theme.of(context).colorScheme.surface,
-                                Theme.of(
-                                  context,
-                                ).colorScheme.primary.withOpacity(0.2),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.surface,
+                              Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.2),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(30),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                              blurRadius: 3,
                             ),
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: [
-                              BoxShadow(
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Tr(
+                                  'progress',
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  "${(progress * 100).toInt()}%",
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 15),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: 12,
+                                backgroundColor: Colors.white.withOpacity(0.3),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            Tr(
+                              'tap_to_view_journey',
+                              style: TextStyle(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onSurfaceVariant.withOpacity(0.5),
-                                blurRadius: 3,
+                                ).colorScheme.onSurfaceVariant,
+                                fontSize: 14,
+                                fontStyle: FontStyle.italic,
                               ),
-                            ],
-                          ),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Tr(
-                                    'progress',
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    "${(progress * 100).toInt()}%",
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 15),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: LinearProgressIndicator(
-                                  value: progress,
-                                  minHeight: 12,
-                                  backgroundColor: Colors.white.withOpacity(
-                                    0.3,
-                                  ),
-                                  valueColor:
-                                      const AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Tr(
-                                'tap_to_view_journey',
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                  fontSize: 14,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      Tr(
-                        'choose_level',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      _levelCard(
-                        lang,
-                        "Seedling",
-                        Icons.circle,
-                        Colors.green,
-                        0,
-                      ),
-                      _levelCard(
-                        lang,
-                        "Sprout",
-                        Icons.grass,
-                        Colors.lightGreen,
-                        100,
-                      ),
-                      _levelCard(
-                        lang,
-                        "Leaf",
-                        Icons.eco,
-                        Colors.greenAccent,
-                        200,
-                      ),
-                      _levelCard(lang, "Stem", Icons.nature, Colors.lime, 300),
-                      _levelCard(
-                        lang,
-                        "Bloom",
-                        Icons.local_florist,
-                        Colors.teal,
-                        400,
-                      ),
-                      const SizedBox(height: 30),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => HistoryScreen(user: widget.user),
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    Tr(
+                      'choose_level',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _levelCard(lang, "Seedling", Icons.circle, Colors.green, 0),
+                    _levelCard(
+                      lang,
+                      "Sprout",
+                      Icons.grass,
+                      Colors.lightGreen,
+                      100,
+                    ),
+                    _levelCard(
+                      lang,
+                      "Leaf",
+                      Icons.eco,
+                      Colors.greenAccent,
+                      200,
+                    ),
+                    _levelCard(lang, "Stem", Icons.nature, Colors.lime, 300),
+                    _levelCard(
+                      lang,
+                      "Bloom",
+                      Icons.local_florist,
+                      Colors.teal,
+                      400,
+                    ),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => HistoryScreen(user: widget.user),
                           ),
-                          icon: const Icon(Icons.history),
-                          label: Tr('view_journey'),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
+                        ),
+                        icon: const Icon(Icons.history),
+                        label: Tr('view_journey'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
               );
             },
@@ -5021,141 +5886,139 @@ class ProgressScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FadeScale(
-      child: ValueListenableBuilder<Map<String, dynamic>>(
-        valueListenable: GlobalSettings.userProfile,
-        builder: (context, profile, _) {
-          // SAFE GUARD: Never return loading screen
-          final safeProfile = (profile.isEmpty) ? <String, dynamic>{} : profile;
+    return ValueListenableBuilder<Map<String, dynamic>>(
+      valueListenable: GlobalSettings.userProfile,
+      builder: (context, profile, _) {
+        // SAFE GUARD: Never return loading screen
+        final safeProfile = (profile.isEmpty) ? <String, dynamic>{} : profile;
 
-          return ValueListenableBuilder<String>(
-            valueListenable: GlobalSettings.language,
-            builder: (context, lang, _) {
-              double score =
-                  (safeProfile['confidenceScore'] as num?)?.toDouble() ?? 0;
-              int streak = profile['currentStreak'] as int? ?? 0;
-              String name = profile['userName'] ?? "Brave Soul";
-              String rank = _getRank(score);
+        return ValueListenableBuilder<String>(
+          valueListenable: GlobalSettings.language,
+          builder: (context, lang, _) {
+            double score =
+                (safeProfile['confidenceScore'] as num?)?.toDouble() ?? 0;
+            int streak = profile['currentStreak'] as int? ?? 0;
+            String name = profile['userName'] ?? "Brave Soul";
+            String rank = _getRank(score);
 
-              return Scaffold(
-                appBar: AppBar(title: Tr('your_growth_path'), elevation: 0),
-                body: SingleChildScrollView(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 20),
-                      Center(
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                              child: Icon(
-                                Icons.person,
-                                size: 60,
-                                color: Theme.of(context).colorScheme.surface,
-                              ),
-                            ),
-                            const SizedBox(height: 15),
-                            Text(
-                              name,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "Confident Grower",
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      Wrap(
-                        spacing: 20,
-                        runSpacing: 20,
-                        alignment: WrapAlignment.center,
+            return Scaffold(
+              appBar: AppBar(title: Tr('your_growth_path'), elevation: 0),
+              body: SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Column(
                         children: [
-                          // USE AppTexts.get('key', lang) -> Returns String
-                          _statCard(
-                            context,
-                            AppTexts.get('total_points', lang),
-                            score.toInt().toString(),
-                            Icons.star,
-                            Colors.amber,
+                          CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            child: Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Theme.of(context).colorScheme.surface,
+                            ),
                           ),
-                          _statCard(
-                            context,
-                            AppTexts.get('current_streak', lang),
-                            "$streak ${AppTexts.get('days', lang)}",
-                            Icons.fireplace,
-                            Colors.orange,
+                          const SizedBox(height: 15),
+                          Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          _statCard(
-                            context,
-                            AppTexts.get('tasks_done', lang),
-                            ((profile['completedTasks'] as List?)?.length ?? 0)
-                                .toString(),
-                            Icons.check_circle,
-                            Colors.green,
-                          ),
-                          _statCard(
-                            context,
-                            AppTexts.get('rank', lang),
-                            rank,
-                            Icons.emoji_events,
-                            Colors.blue,
+                          Text(
+                            "Confident Grower",
+                            style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 40),
-                      Tr(
-                        'your_journey',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Tr(
-                        'keep_growing_sub',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                      const SizedBox(height: 40),
-                      OutlinedButton.icon(
-                        onPressed: () => Navigator.push(
+                    ),
+                    const SizedBox(height: 40),
+                    Wrap(
+                      spacing: 20,
+                      runSpacing: 20,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        // USE AppTexts.get('key', lang) -> Returns String
+                        _statCard(
                           context,
-                          MaterialPageRoute(builder: (_) => FAQScreen()),
+                          AppTexts.get('total_points', lang),
+                          score.toInt().toString(),
+                          Icons.star,
+                          Colors.amber,
                         ),
-                        icon: const Icon(Icons.help_outline),
-                        label: Tr('how_it_works'),
+                        _statCard(
+                          context,
+                          AppTexts.get('current_streak', lang),
+                          "$streak ${AppTexts.get('days', lang)}",
+                          Icons.fireplace,
+                          Colors.orange,
+                        ),
+                        _statCard(
+                          context,
+                          AppTexts.get('tasks_done', lang),
+                          ((profile['completedTasks'] as List?)?.length ?? 0)
+                              .toString(),
+                          Icons.check_circle,
+                          Colors.green,
+                        ),
+                        _statCard(
+                          context,
+                          AppTexts.get('rank', lang),
+                          rank,
+                          Icons.emoji_events,
+                          Colors.blue,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 40),
+                    Tr(
+                      'your_journey',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 15), // Spacing
-                      // --- ADD THIS CONTACT BUTTON ---
-                      TextButton.icon(
-                        onPressed: () => _showContactDialog(context),
-                        icon: const Icon(Icons.contact_mail_outlined),
-                        label: Tr('contact_us'),
-                        style: TextButton.styleFrom(
-                          // Removes standard button internal padding so it scales naturally like the FAQ button
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.0,
-                            vertical: 8.0,
-                          ),
+                    ),
+                    const SizedBox(height: 10),
+                    Tr(
+                      'keep_growing_sub',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 40),
+                    OutlinedButton.icon(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => FAQScreen()),
+                      ),
+                      icon: const Icon(Icons.help_outline),
+                      label: Tr('how_it_works'),
+                    ),
+                    const SizedBox(height: 15), // Spacing
+                    // --- ADD THIS CONTACT BUTTON ---
+                    TextButton.icon(
+                      onPressed: () => _showContactDialog(context),
+                      icon: const Icon(Icons.contact_mail_outlined),
+                      label: Tr('contact_us'),
+                      style: TextButton.styleFrom(
+                        // Removes standard button internal padding so it scales naturally like the FAQ button
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.0,
+                          vertical: 8.0,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          );
-        },
-      ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -5309,7 +6172,7 @@ class _TaskScreenState extends State<TaskScreen> {
           ],
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.transparent,
+        // backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       // BODY LISTENS TO LANGUAGE
@@ -5639,129 +6502,127 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
       appBar: AppBar(
         title: Tr('reflect'), // Tr handles its own listening
         elevation: 0,
-        backgroundColor: Colors.transparent,
+        // backgroundColor: Colors.transparent,
       ),
       // BODY LISTENS TO LANGUAGE
       body: ValueListenableBuilder<String>(
         valueListenable: GlobalSettings.language,
         builder: (context, lang, _) {
-          return FadeScale(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(30.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Tr(
-                    'reflect',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Tr(
+                  'reflect',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Text(
-                    "Challenge: ${widget.taskTitle}",
-                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 40),
+                ),
+                Text(
+                  "Challenge: ${widget.taskTitle}",
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 40),
 
-                  // Anxiety Section
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
+                // Anxiety Section
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Tr(
+                        'anxiety_q',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Slider(
+                        value: _anxiety,
+                        min: 1,
+                        max: 10,
+                        divisions: 9,
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        label: _anxiety.round().toString(),
+                        onChanged: (v) => setState(() => _anxiety = v),
+                      ),
+                      Center(
+                        child: Text(
+                          "${_anxiety.toInt()}",
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+
+                // Reflection Text Field
+                Tr(
+                  'what_happened',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: _noteController,
+                  maxLines: 5,
+                  decoration: InputDecoration(
+                    hintText: AppTexts.get(
+                      'write_experience_hint',
+                      lang,
+                    ), // Add this key to AppTexts or use Tr('write_experience_hint')
+                    border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Tr(
-                          'anxiety_q',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        Slider(
-                          value: _anxiety,
-                          min: 1,
-                          max: 10,
-                          divisions: 9,
-                          activeColor: Theme.of(context).colorScheme.primary,
-                          label: _anxiety.round().toString(),
-                          onChanged: (v) => setState(() => _anxiety = v),
-                        ),
-                        Center(
-                          child: Text(
-                            "${_anxiety.toInt()}",
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.teal,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    fillColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    filled: true,
                   ),
-                  const SizedBox(height: 30),
+                ),
+                const SizedBox(height: 40),
 
-                  // Reflection Text Field
-                  Tr(
-                    'what_happened',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  TextField(
-                    controller: _noteController,
-                    maxLines: 5,
-                    decoration: InputDecoration(
-                      hintText: AppTexts.get(
-                        'write_experience_hint',
-                        lang,
-                      ), // Add this key to AppTexts or use Tr('write_experience_hint')
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      fillColor: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      filled: true,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-
-                  // Finish Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: _isSaving
-                        ? const Center(child: CircularProgressIndicator())
-                        : ElevatedButton(
-                            onPressed: _finishReflection,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              backgroundColor: Theme.of(
-                                context,
-                              ).colorScheme.primary,
-                              foregroundColor: Theme.of(
-                                context,
-                              ).colorScheme.surface,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            child: Tr(
-                              'finish',
-                              style: const TextStyle(fontSize: 18),
+                // Finish Button
+                SizedBox(
+                  width: double.infinity,
+                  child: _isSaving
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _finishReflection,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.surface,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                  ),
-                ],
-              ),
+                          child: Tr(
+                            'finish',
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                        ),
+                ),
+              ],
             ),
           );
         },
@@ -5812,208 +6673,199 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FadeScale(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Tr('profile'), // Widget
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-        // LISTEN TO LANGUAGE FOR THE WHOLE BODY
-        body: ValueListenableBuilder<String>(
-          valueListenable: GlobalSettings.language,
-          builder: (context, lang, _) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    child: Icon(
-                      Icons.person,
-                      size: 60,
-                      color: Theme.of(context).colorScheme.surface,
+    return Scaffold(
+      appBar: AppBar(
+        title: Tr('profile'), // Widget
+        elevation: 0,
+        // backgroundColor: Colors.transparent,
+      ),
+      // LISTEN TO LANGUAGE FOR THE WHOLE BODY
+      body: ValueListenableBuilder<String>(
+        valueListenable: GlobalSettings.language,
+        builder: (context, lang, _) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: Icon(
+                    Icons.person,
+                    size: 60,
+                    color: Theme.of(context).colorScheme.surface,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // UserName updates via GlobalSettings.userProfile listener
+                ValueListenableBuilder<Map<String, dynamic>>(
+                  valueListenable: GlobalSettings.userProfile,
+                  builder: (_, p, __) => Text(
+                    p['userName'] ?? "Brave Soul",
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // UserName updates via GlobalSettings.userProfile listener
-                  ValueListenableBuilder<Map<String, dynamic>>(
-                    valueListenable: GlobalSettings.userProfile,
-                    builder: (_, p, __) => Text(
-                      p['userName'] ?? "Brave Soul",
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    "Confident Grower",
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  const SizedBox(height: 40),
+                ),
+                Text(
+                  "Confident Grower",
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 40),
 
-                  // USE AppTexts.get('key', lang) FOR HELPER METHODS REQUIRING STRINGS
-                  _buildSection(AppTexts.get('account', lang), [
-                    TextField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: AppTexts.get('display_name', lang),
-                        border: const OutlineInputBorder(),
-                      ),
+                // USE AppTexts.get('key', lang) FOR HELPER METHODS REQUIRING STRINGS
+                _buildSection(AppTexts.get('account', lang), [
+                  TextField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: AppTexts.get('display_name', lang),
+                      border: const OutlineInputBorder(),
                     ),
-                    const SizedBox(height: 15),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _updateName,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          foregroundColor: Theme.of(
-                            context,
-                          ).colorScheme.surface,
-                        ),
-                        child: Tr('save_name'), // Widget
+                  ),
+                  const SizedBox(height: 15),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _updateName,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.surface,
                       ),
+                      child: Tr('save_name'), // Widget
                     ),
-                  ]),
-                  const SizedBox(height: 20),
+                  ),
+                ]),
+                const SizedBox(height: 20),
 
-                  _buildSection(AppTexts.get('app_theme', lang), [
-                    Tr(
-                      'select_color',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ), // Widget
-                    const SizedBox(height: 15),
-                    Wrap(
-                      spacing: 12,
-                      runSpacing: 12,
-                      children: [
-                        ...GlobalSettings.themePalette.map((color) {
-                          bool isSelected =
-                              GlobalSettings.themeColor.value == color;
-                          return GestureDetector(
-                            onTap: () => GlobalSettings.saveTheme(color),
-                            child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Colors.black
-                                      : Colors.transparent,
-                                  width: 3,
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurface,
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                              child: isSelected
-                                  ? const Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 20,
-                                    )
-                                  : null,
-                            ),
-                          );
-                        }).toList(),
-                        GestureDetector(
-                          onTap: _showColorPicker,
+                _buildSection(AppTexts.get('app_theme', lang), [
+                  Tr(
+                    'select_color',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ), // Widget
+                  const SizedBox(height: 15),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      ...GlobalSettings.themePalette.map((color) {
+                        bool isSelected =
+                            GlobalSettings.themeColor.value == color;
+                        return GestureDetector(
+                          onTap: () => GlobalSettings.saveTheme(color),
                           child: Container(
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
+                              color: color,
                               shape: BoxShape.circle,
-                              gradient: const SweepGradient(
-                                colors: [
-                                  Colors.red,
-                                  Colors.yellow,
-                                  Colors.green,
-                                  Colors.blue,
-                                  Colors.purple,
-                                  Colors.red,
-                                ],
-                              ),
                               border: Border.all(
-                                color: Colors.grey.shade300,
-                                width: 2,
+                                color: isSelected
+                                    ? Colors.black
+                                    : Colors.transparent,
+                                width: 3,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                  blurRadius: 4,
+                                ),
+                              ],
                             ),
-                            child: const Icon(
-                              Icons.colorize,
-                              size: 20,
-                              color: Colors.white,
+                            child: isSelected
+                                ? const Icon(
+                                    Icons.check,
+                                    color: Colors.white,
+                                    size: 20,
+                                  )
+                                : null,
+                          ),
+                        );
+                      }).toList(),
+                      GestureDetector(
+                        onTap: _showColorPicker,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: const SweepGradient(
+                              colors: [
+                                Colors.red,
+                                Colors.yellow,
+                                Colors.green,
+                                Colors.blue,
+                                Colors.purple,
+                                Colors.red,
+                              ],
+                            ),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 2,
                             ),
                           ),
+                          child: const Icon(
+                            Icons.colorize,
+                            size: 20,
+                            color: Colors.white,
+                          ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _themeModeButton(
-                          AppTexts.get('light_mode', lang),
-                          ThemeMode.light,
-                          lang,
-                        ), // Pass String
-                        _themeModeButton(
-                          AppTexts.get('dark_mode', lang),
-                          ThemeMode.dark,
-                          lang,
-                        ),
-                      ],
-                    ),
-                  ]),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _themeModeButton(
+                        AppTexts.get('light_mode', lang),
+                        ThemeMode.light,
+                        lang,
+                      ), // Pass String
+                      _themeModeButton(
+                        AppTexts.get('dark_mode', lang),
+                        ThemeMode.dark,
+                        lang,
+                      ),
+                    ],
+                  ),
+                ]),
+                const SizedBox(height: 20),
 
-                  _buildSection(AppTexts.get('language', lang), [
-                    _buildLanguageSelector(context, lang), // Pass lang
-                  ]),
-                  const SizedBox(height: 60),
-                  TextButton(
-                    onPressed: () => AuthService().signOut(),
-                    child: Tr(
-                      'logout',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
+                _buildSection(AppTexts.get('language', lang), [
+                  _buildLanguageSelector(context, lang), // Pass lang
+                ]),
+                const SizedBox(height: 60),
+                TextButton(
+                  onPressed: () => AuthService().signOut(),
+                  child: Tr(
+                    'logout',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 10), // Spacing
-                  // --- ADD THIS RESET BUTTON ---
-                  TextButton(
-                    onPressed: () => _showResetConfirmation(context),
-                    child: Tr(
-                      'reset_all_progress',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ),
+                const SizedBox(height: 10), // Spacing
+                // --- ADD THIS RESET BUTTON ---
+                TextButton(
+                  onPressed: () => _showResetConfirmation(context),
+                  child: Tr(
+                    'reset_all_progress',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20), // Bottom padding
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                const SizedBox(height: 20), // Bottom padding
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -6079,6 +6931,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       {'code': 'fr', 'name': 'Français', 'flag': '🇫🇷'},
       {'code': 'hi', 'name': 'हिन्दी', 'flag': '🇮🇳'},
       {'code': 'de', 'name': 'Deutsch', 'flag': '🇩🇪'},
+      {'code': 'ur', 'name': 'Urdu', 'flag': '🇵🇰'},
     ];
 
     return Container(
@@ -6334,102 +7187,94 @@ class HistoryScreen extends StatelessWidget {
   // 3. The actual build method (The missing piece!)
   @override
   Widget build(BuildContext context) {
-    return FadeScale(
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Growth Journey"),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-        body: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _loadHistory(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting)
-              return theLoadingScreen();
-            if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.auto_stories,
-                      size: 80,
-                      color: Colors.grey,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Growth Journey"),
+        elevation: 0,
+        // backgroundColor: Colors.transparent,
+      ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _loadHistory(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return theLoadingScreen();
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.auto_stories, size: 80, color: Colors.grey),
+                  const SizedBox(height: 20),
+                  Text(
+                    "No reflections yet. Start your journey!",
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          List<Map<String, dynamic>> history = snapshot.data!;
+          return ListView.builder(
+            padding: const EdgeInsets.all(24.0),
+            physics: const BouncingScrollPhysics(),
+            itemCount: history.length,
+            itemBuilder: (context, index) {
+              var entry = history[index];
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: Text(
+                      entry['title'] ?? "Challenge",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      "No reflections yet. Start your journey!",
-                      style: const TextStyle(color: Colors.grey),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        Text(
+                          entry['note'] ?? "No notes added",
+                          style: const TextStyle(fontStyle: FontStyle.italic),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Anxiety: ${entry['anxiety']}/10",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                            Text(
+                              entry['date'] ?? "",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showTaskDetail(context, entry),
+                  ),
                 ),
               );
-            }
-
-            List<Map<String, dynamic>> history = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.all(24.0),
-              physics: const BouncingScrollPhysics(),
-              itemCount: history.length,
-              itemBuilder: (context, index) {
-                var entry = history[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      title: Text(
-                        entry['title'] ?? "Challenge",
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 8),
-                          Text(
-                            entry['note'] ?? "No notes added",
-                            style: const TextStyle(fontStyle: FontStyle.italic),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Anxiety: ${entry['anxiety']}/10",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                              ),
-                              Text(
-                                entry['date'] ?? "",
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _showTaskDetail(context, entry),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        ),
+            },
+          );
+        },
       ),
     );
   }
@@ -6454,43 +7299,41 @@ class FAQScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FadeScale(
-      child: Scaffold(
-        appBar: AppBar(title: Tr('help_faq'), elevation: 0),
-        // LISTEN TO LANGUAGE FOR INSTANT SWITCHING
-        body: ValueListenableBuilder<String>(
-          valueListenable: GlobalSettings.language,
-          builder: (context, lang, _) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Tr(
-                    'common_questions',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+    return Scaffold(
+      appBar: AppBar(title: Tr('help_faq'), elevation: 0),
+      // LISTEN TO LANGUAGE FOR INSTANT SWITCHING
+      body: ValueListenableBuilder<String>(
+        valueListenable: GlobalSettings.language,
+        builder: (context, lang, _) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Tr(
+                  'common_questions',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // MAP OVER KEYS, USE Tr() FOR TITLE AND CONTENT
+                ..._faqKeys.map((faq) => _buildFAQItem(context, faq)),
+                const SizedBox(height: 40),
+                Center(
+                  child: Tr(
+                    'keep_blooming',
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey[600],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // MAP OVER KEYS, USE Tr() FOR TITLE AND CONTENT
-                  ..._faqKeys.map((faq) => _buildFAQItem(context, faq)),
-                  const SizedBox(height: 40),
-                  Center(
-                    child: Tr(
-                      'keep_blooming',
-                      style: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -6602,97 +7445,95 @@ class MilestoneScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     Color primaryColor = GlobalSettings.themeColor.value;
 
-    return FadeScale(
-      child: Scaffold(
-        appBar: AppBar(title: Tr('your_growth_path'), elevation: 0),
-        // LISTEN TO LANGUAGE
-        body: ValueListenableBuilder<String>(
-          valueListenable: GlobalSettings.language,
-          builder: (context, lang, _) {
-            return StreamBuilder<DocumentSnapshot>(
-              stream: UserService().getUserStream(user),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return theLoadingScreen();
+    return Scaffold(
+      appBar: AppBar(title: Tr('your_growth_path'), elevation: 0),
+      // LISTEN TO LANGUAGE
+      body: ValueListenableBuilder<String>(
+        valueListenable: GlobalSettings.language,
+        builder: (context, lang, _) {
+          return StreamBuilder<DocumentSnapshot>(
+            stream: UserService().getUserStream(user),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return theLoadingScreen();
 
-                if (!snapshot.data!.exists) return theLoadingScreen();
+              if (!snapshot.data!.exists) return theLoadingScreen();
 
-                var data = snapshot.data!.data() as Map<String, dynamic>;
-                double score = (data['confidenceScore'] ?? 0).toDouble();
-                double progress = (score / 100).clamp(0.0, 1.0);
+              var data = snapshot.data!.data() as Map<String, dynamic>;
+              double score = (data['confidenceScore'] ?? 0).toDouble();
+              double progress = (score / 100).clamp(0.0, 1.0);
 
-                return SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Stack(
-                    children: [
-                      // The Dynamic Glowing Line
-                      Positioned.fill(
-                        child: CustomPaint(
-                          painter: PathLinePainter(
-                            color: primaryColor,
-                            progress: progress,
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Stack(
+                  children: [
+                    // The Dynamic Glowing Line
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: PathLinePainter(
+                          color: primaryColor,
+                          progress: progress,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Column(
+                        children: [
+                          // Pass 'lang' to the node builder
+                          _buildMilestoneNode(
+                            context,
+                            lang,
+                            0,
+                            'the_awakening',
+                            'seed_badge',
+                            Icons.search,
+                            0,
                           ),
-                        ),
+                          _buildMilestoneNode(
+                            context,
+                            lang,
+                            1,
+                            'first_spark',
+                            'bronze_leaf',
+                            Icons.auto_awesome,
+                            20,
+                          ),
+                          _buildMilestoneNode(
+                            context,
+                            lang,
+                            2,
+                            'social_courage',
+                            'silver_sprout',
+                            Icons.bolt,
+                            40,
+                          ),
+                          _buildMilestoneNode(
+                            context,
+                            lang,
+                            3,
+                            'confidence_bloom',
+                            'gold_flower',
+                            Icons.local_florist,
+                            60,
+                          ),
+                          _buildMilestoneNode(
+                            context,
+                            lang,
+                            4,
+                            'mastery',
+                            'diamond_crown',
+                            Icons.workspace_premium,
+                            100,
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 40),
-                        child: Column(
-                          children: [
-                            // Pass 'lang' to the node builder
-                            _buildMilestoneNode(
-                              context,
-                              lang,
-                              0,
-                              'the_awakening',
-                              'seed_badge',
-                              Icons.search,
-                              0,
-                            ),
-                            _buildMilestoneNode(
-                              context,
-                              lang,
-                              1,
-                              'first_spark',
-                              'bronze_leaf',
-                              Icons.auto_awesome,
-                              20,
-                            ),
-                            _buildMilestoneNode(
-                              context,
-                              lang,
-                              2,
-                              'social_courage',
-                              'silver_sprout',
-                              Icons.bolt,
-                              40,
-                            ),
-                            _buildMilestoneNode(
-                              context,
-                              lang,
-                              3,
-                              'confidence_bloom',
-                              'gold_flower',
-                              Icons.local_florist,
-                              60,
-                            ),
-                            _buildMilestoneNode(
-                              context,
-                              lang,
-                              4,
-                              'mastery',
-                              'diamond_crown',
-                              Icons.workspace_premium,
-                              100,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -6847,160 +7688,158 @@ class _ShopScreenState extends State<ShopScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return FadeScale(
-      child: Scaffold(
-        appBar: AppBar(title: Tr('shop_title'), elevation: 0), // Tr Widget
-        // LISTEN TO LANGUAGE CHANGES
-        body: ValueListenableBuilder<String>(
-          valueListenable: GlobalSettings.language,
-          builder: (context, lang, _) {
-            return Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  // Points Card
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Tr(
-                          'your_points',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ), // Widget
-                        Text(
-                          "$_points pts",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
+    return Scaffold(
+      appBar: AppBar(title: Tr('shop_title'), elevation: 0), // Tr Widget
+      // LISTEN TO LANGUAGE CHANGES
+      body: ValueListenableBuilder<String>(
+        valueListenable: GlobalSettings.language,
+        builder: (context, lang, _) {
+          return Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                // Points Card
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  const SizedBox(height: 30),
-                  Tr(
-                    'available_items',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ), // Widget
-                  const SizedBox(height: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Tr(
+                        'your_points',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ), // Widget
+                      Text(
+                        "$_points pts",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Tr(
+                  'available_items',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ), // Widget
+                const SizedBox(height: 20),
 
-                  // Streak Freeze Item
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
+                // Streak Freeze Item
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
                       color: Theme.of(
                         context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(25),
-                      border: Border.all(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer.withOpacity(0.5),
-                      ),
+                      ).colorScheme.primaryContainer.withOpacity(0.5),
                     ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.ac_unit, size: 40, color: Colors.blue),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Tr(
-                                'streak_freeze',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ), // Widget
-                              Text(
-                                AppTexts.get('protects_streak', lang),
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ), // String
-                            ],
-                          ),
-                        ),
-                        Column(
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.ac_unit, size: 40, color: Colors.blue),
+                      const SizedBox(width: 15),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              "$freezeCost pts",
-                              style: TextStyle(
+                            Tr(
+                              'streak_freeze',
+                              style: const TextStyle(
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
                               ),
-                            ),
-                            const SizedBox(height: 10),
-                            ElevatedButton(
-                              onPressed: _points >= freezeCost
-                                  ? _buyFreeze
-                                  : null,
-                              child: Tr('buy'), // Widget
-                            ),
+                            ), // Widget
+                            Text(
+                              AppTexts.get('protects_streak', lang),
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ), // String
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Column(
+                        children: [
+                          Text(
+                            "$freezeCost pts",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          ElevatedButton(
+                            onPressed: _points >= freezeCost
+                                ? _buyFreeze
+                                : null,
+                            child: Tr('buy'), // Widget
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 30),
-                  const Divider(),
-                  const SizedBox(height: 20),
-                  Tr(
-                    'your_inventory',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ), // Widget
-                  const SizedBox(height: 15),
+                ),
+                const SizedBox(height: 30),
+                const Divider(),
+                const SizedBox(height: 20),
+                Tr(
+                  'your_inventory',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ), // Widget
+                const SizedBox(height: 15),
 
-                  // Inventory ListTile
-                  ListTile(
-                    leading: const Icon(
-                      Icons.ac_unit_outlined,
-                      color: Colors.blue,
-                    ),
-                    title: Tr('streak_freeze'), // Widget
-                    subtitle: Text(
-                      AppTexts.get('owned', lang) +
-                          ': $_ownedFreezes | ' +
-                          AppTexts.get('equipped', lang) +
-                          ': $_activeFreezes/2',
-                    ), // String
-                    trailing: _activeFreezes < 2 && _ownedFreezes > 0
-                        ? ElevatedButton(
-                            onPressed: _isLoading ? null : _equipFreeze,
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 16,
-                                    height: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Tr('equip_freeze'), // Widget
-                          )
-                        : const SizedBox(),
+                // Inventory ListTile
+                ListTile(
+                  leading: const Icon(
+                    Icons.ac_unit_outlined,
+                    color: Colors.blue,
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                  title: Tr('streak_freeze'), // Widget
+                  subtitle: Text(
+                    AppTexts.get('owned', lang) +
+                        ': $_ownedFreezes | ' +
+                        AppTexts.get('equipped', lang) +
+                        ': $_activeFreezes/2',
+                  ), // String
+                  trailing: _activeFreezes < 2 && _ownedFreezes > 0
+                      ? ElevatedButton(
+                          onPressed: _isLoading ? null : _equipFreeze,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Tr('equip_freeze'), // Widget
+                        )
+                      : const SizedBox(),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
