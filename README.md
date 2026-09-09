@@ -9,13 +9,21 @@ It’s reflective: After every task, you pause. How anxious was I? What actually
 
 ## Bloom v2.00
 This is the latest update of the bloom app, introduced with many features to offer, such as: 
+
 Multiple login options including email, google and guest.
+
 Streak freeze system. 
+
 Progress screen with all the achievements shown in plain sight.
+
 Brand new milestones system, with growth shown in real time.
+
 Brand new beautiful user interface and layout with a choice for the user to select a colors from a variety of options.
+
 Number of languages for user to select from, for the texts in the app.
+
 Subtle but elegant animations in many places.
+
 Many more features that are added are discussed in the changelog of the latest release.
 
 ### Getting Started
