@@ -23808,7 +23808,7 @@ class ProgressScreen extends StatelessWidget {
                     Text(
                       email,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.primary,
                         decoration: TextDecoration.underline,
