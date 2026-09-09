@@ -17,60 +17,60 @@ import 'package:flutter/widgets.dart';
 import 'package:collection/collection.dart';
 import 'dart:async';
 
-const int MAX_CONFIDENCE_SCORE = 500; // Global Constant
+const int MAX_CONFIDENCE_SCORE = 880; // Global Constant
 
 final List<MilestoneDefinition> GAME_MILESTONES = [
-  // INDEX 0: FIRST MILESTONE - REQUIRES 20 POINTS (Locked at start!)
+  // INDEX 0: FIRST MILESTONE - REQUIRES 40 POINTS (Locked at start!)
   MilestoneDefinition(
     id: 'awakening',
     titleKey: 'the_awakening',
     rewardKey: 'seed_badge',
     icon: Icons.psychology_alt,
-    requiredScore: 20,
+    requiredScore: 40,
     bonusPoints: 10,
     color: Colors.brown.shade400,
   ),
 
-  // INDEX 1: 100 Points
+  // INDEX 1: 140 Points
   MilestoneDefinition(
     id: 'first_spark',
     titleKey: 'first_spark',
     rewardKey: 'bronze_leaf',
     icon: Icons.flash_on,
-    requiredScore: 100,
+    requiredScore: 140,
     bonusPoints: 25,
     color: Colors.deepOrange,
   ),
 
-  // INDEX 2: 200 Points
+  // INDEX 2: 340 Points
   MilestoneDefinition(
     id: 'social_courage',
     titleKey: 'social_courage',
     rewardKey: 'silver_sprout',
     icon: Icons.shield,
-    requiredScore: 200,
+    requiredScore: 340,
     bonusPoints: 50,
     color: Colors.grey.shade400,
   ),
 
-  // INDEX 3: 300 Points
+  // INDEX 3: 580 Points
   MilestoneDefinition(
     id: 'confidence_bloom',
     titleKey: 'confidence_bloom',
     rewardKey: 'gold_flower',
     icon: Icons.local_florist,
-    requiredScore: 300,
+    requiredScore: 580,
     bonusPoints: 100,
     color: Colors.amber,
   ),
 
-  // INDEX 4: 500 Points (MAX)
+  // INDEX 4: 880 Points (MAX)
   MilestoneDefinition(
     id: 'mastery',
     titleKey: 'mastery',
     rewardKey: 'diamond_crown',
     icon: Icons.diamond,
-    requiredScore: 500,
+    requiredScore: 880,
     bonusPoints: 250,
     color: Colors.cyanAccent.shade400,
   ),
@@ -260,24 +260,25 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
 
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1600), // Total sequence duration
+      duration: const Duration(milliseconds: 2200), // Total sequence duration
       vsync: this,
     );
 
+    // Adjust these intervals proportionally (2200/1600 = 1.375x)
     // 1. Logo: Scale up with elastic curve (0.0s - 0.6s)
     _logoScaleAnim = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.0, 0.6, curve: Curves.elasticOut),
+      curve: const Interval(0.0, 0.8, curve: Curves.elasticOut),
     );
     // Logo fade in slightly faster
     _logoFadeAnim = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
     );
 
     // 2. Text: Slide up + Fade in (0.4s - 1.0s)
     _textSlideAnim =
-        Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0, 0.7), end: Offset.zero).animate(
           CurvedAnimation(
             parent: _controller,
             curve: const Interval(0.4, 0.9, curve: Curves.easeOutCubic),
@@ -291,7 +292,7 @@ class _SplashScreenState extends State<SplashScreen>
     // 3. Progress Bar: Fade in last (0.8s - 1.0s)
     _progressFadeAnim = CurvedAnimation(
       parent: _controller,
-      curve: const Interval(0.8, 1.0, curve: Curves.easeIn),
+      curve: const Interval(0.6, 1.0, curve: Curves.easeIn),
     );
 
     _controller.forward();
@@ -708,7 +709,7 @@ class AppTexts {
       'mastery': 'Mastery',
       'diamond_crown': 'Diamond Crown',
       'milestone_claimed': 'Claimed',
-      'milestone_need_score': 'Need {0}%',
+      'milestone_need_score': 'Need {0}pts',
       'milestone_claim_reward': 'Claim +{0} pts',
       'milestone_reward_toast': 'Claimed! +{0} pts',
       // FAQ Screen
@@ -758,6 +759,7 @@ class AppTexts {
       'move_to_next_level': 'Move to Next Level',
       // Reflection Screen
       'reflect': 'Reflect on your growth',
+      'challenge': 'Challenge',
       'anxiety_q': 'How anxious did you feel? (1-10)',
       'what_happened': 'What actually happened?',
       'write_experience_hint': 'Write about your experience...',
@@ -899,6 +901,7 @@ class AppTexts {
       'move_to_next_level': 'Pasar al siguiente nivel',
       // Reflection Screen
       'reflect': 'Reflexiona sobre tu crecimiento',
+      'challenge': 'Desafío',
       'anxiety_q': '¿Qué tan ansioso te sentiste? (1-10)',
       'what_happened': '¿Qué pasó realmente?',
       'write_experience_hint': 'Escribe sobre tu experiencia...',
@@ -1040,6 +1043,7 @@ class AppTexts {
       'move_to_next_level': 'Passer au niveau suivant',
       // Reflection Screen
       'reflect': 'Réfléchissez à votre croissance',
+      'challenge': 'Défi',
       'anxiety_q': 'À quel point étiez-vous anxieux ? (1-10)',
       'what_happened': 'Que s\'est-il passé réellement ?',
       'write_experience_hint': 'Écrivez sur votre expérience...',
@@ -1180,6 +1184,7 @@ class AppTexts {
       'move_to_next_level': 'अगले स्तर पर जाएँ',
       // Reflection Screen
       'reflect': 'अपने विकास पर विचार करें',
+      'challenge': 'चुनौती',
       'anxiety_q': 'आपने कितनी घबराहट महसूस की? (1-10)',
       'what_happened': 'वास्तव में क्या हुआ था?',
       'write_experience_hint': 'अपने अनुभव के बारे में लिखें...',
@@ -1321,6 +1326,7 @@ class AppTexts {
       'move_to_next_level': 'Gehen Sie zur nächsten Ebene',
       // Reflection Screen
       'reflect': 'Reflektiere über deine Entwicklung',
+      'challenge': 'Herausforderung',
       'anxiety_q': 'Wie nervös hast du dich gefühlt? (1-10)',
       'what_happened': 'Was ist wirklich passiert?',
       'write_experience_hint': 'Schreibe über deine Erfahrung...',
@@ -1461,6 +1467,7 @@ class AppTexts {
       'move_to_next_level': 'اگلی سطح پر جائیں۔',
       // Reflection Screen
       'reflect': 'اپنی ترقی پر غور کریں',
+      'challenge': 'چیلنج',
       'anxiety_q': 'آپ نے کتنی گھبراہٹ محسوس کی؟ (1-10)',
       'what_happened': 'اصل میں کیا ہوا تھا؟',
       'write_experience_hint': 'اپنے تجربے کے بارے میں لکھیں...',
@@ -1601,6 +1608,7 @@ class AppTexts {
       'move_to_next_level': 'الانتقال إلى المستوى التالي',
       // Reflection Screen
       'reflect': 'تأمل في نموك',
+      'challenge': 'تحدي',
       'anxiety_q': 'ما مدى القلق الذي شعرت به؟ (1-10)',
       'what_happened': 'ماذا حدث بالفعل؟',
       'write_experience_hint': 'اكتب عن تجربتك...',
@@ -1740,6 +1748,7 @@ class AppTexts {
       'move_to_next_level': '次のレベルに移動',
       // Reflection Screen
       'reflect': '自分の成長を振り返る',
+      'challenge': 'チャレンジ',
       'anxiety_q': 'どのくらい不安を感じましたか？ (1-10)',
       'what_happened': '実際には何が起こりましたか？',
       'write_experience_hint': 'あなたの体験について書きましょう...',
@@ -1879,6 +1888,7 @@ class AppTexts {
       'move_to_next_level': '다음 레벨로 이동',
       // Reflection Screen
       'reflect': '나의 성장을 돌아보기',
+      'challenge': '도전',
       'anxiety_q': '얼마나 불안하셨나요? (1-10)',
       'what_happened': '실제로는 어떤 일이 일어났나요?',
       'write_experience_hint': '그때의 경험에 대해 작성해 보세요...',
@@ -2013,6 +2023,7 @@ class AppTexts {
       'move_to_next_level': '进入下一个级别',
       // Reflection Screen
       'reflect': '复盘你的成长',
+      'challenge': '挑战',
       'anxiety_q': '你感到多么焦虑？(1-10)',
       'what_happened': '实际发生了什么？',
       'write_experience_hint': '写下你的这次体验...',
@@ -2153,6 +2164,7 @@ class AppTexts {
       'move_to_next_level': 'Passa al livello successivo',
       // Reflection Screen
       'reflect': 'Rifletti sulla tua crescita',
+      'challenge': 'Sfida',
       'anxiety_q': 'Quanto ti sei sentito ansioso? (1-10)',
       'what_happened': 'Cosa è successo davvero?',
       'write_experience_hint': 'Scrivi la tua esperienza...',
@@ -2292,6 +2304,7 @@ class AppTexts {
       'move_to_next_level': 'Перейти на следующий уровень',
       // Reflection Screen
       'reflect': 'Обдумай свой рост',
+      'challenge': 'Испытание',
       'anxiety_q': 'Насколько тревожно ты себя чувствовал? (1-10)',
       'what_happened': 'Что произошло на самом деле?',
       'write_experience_hint': 'Опиши свой опыт...',
@@ -2432,6 +2445,7 @@ class AppTexts {
       'move_to_next_level': 'Sonraki Seviyeye Geçin',
       // Reflection Screen
       'reflect': 'Gelişimini değerlendir',
+      'challenge': 'Meydan okumak',
       'anxiety_q': 'Ne kadar kaygılı hissettin? (1-10)',
       'what_happened': 'Gerçekte ne oldu?',
       'write_experience_hint': 'Deneyimin hakkında yaz...',
@@ -2572,6 +2586,7 @@ class AppTexts {
       'move_to_next_level': 'Ga naar het volgende niveau',
       // Reflection Screen
       'reflect': 'Reflecteer op je groei',
+      'challenge': 'Uitdaging',
       'anxiety_q': 'Hoe angstig voelde je je? (1-10)',
       'what_happened': 'Wat gebeurde er werkelijk?',
       'write_experience_hint': 'Schrijf over je ervaring...',
@@ -2711,6 +2726,7 @@ class AppTexts {
       'move_to_next_level': 'পরবর্তী স্তরে যান',
       // Reflection Screen
       'reflect': 'আপনার বৃদ্ধির ওপর আলোকপাত করুন',
+      'challenge': 'চ্যালেঞ্জ',
       'anxiety_q': 'আপনি কতটা উদ্বিগ্ন বোধ করেছিলেন? (১-১০)',
       'what_happened': 'আসলে কী ঘটেছিল?',
       'write_experience_hint': 'আপনার অভিজ্ঞতা সম্পর্কে লিখুন...',
@@ -2853,6 +2869,7 @@ class AppTexts {
       'move_to_next_level': 'அடுத்த நிலைக்கு நகர்த்தவும்',
       // Reflection Screen
       'reflect': 'உங்கள் வளர்ச்சியைப் பற்றி சிந்தியுங்கள்',
+      'challenge': 'சவால்',
       'anxiety_q': 'நீங்கள் எவ்வளவு பதற்றமாக உணர்ந்தீர்கள்? (1-10)',
       'what_happened': 'உண்மையில் என்ன நடந்தது?',
       'write_experience_hint': 'உங்கள் அனுபவத்தைப் பற்றி எழுதுங்கள்...',
@@ -2993,6 +3010,7 @@ class AppTexts {
       'move_to_next_level': 'తదుపరి స్థాయికి తరలించండి',
       // Reflection Screen
       'reflect': 'నీ ఎదుగుదలను సమీక్షించుకో',
+      'challenge': 'సవాలు',
       'anxiety_q': 'నువ్వు ఎంత ఆందోళనగా ఫీల్ అయ్యావు? (1-10)',
       'what_happened': 'అసలు ఏమి జరిగింది?',
       'write_experience_hint': 'నీ అనుభవం గురించి రాయి...',
@@ -3134,6 +3152,7 @@ class AppTexts {
       'move_to_next_level': 'ಮುಂದಿನ ಹಂತಕ್ಕೆ ಸರಿಸಿ',
       // Reflection Screen
       'reflect': 'ನಿನ್ನ ಬೆಳವಣಿಗೆಯನ್ನು ಪರಾಮರ್ಶಿಸು',
+      'challenge': 'ಸವಾಲು',
       'anxiety_q': 'ನೀನು ಎಷ್ಟು ಆತಂಕವನ್ನು ಅನುಭವಿಸಿದೆ? (1-10)',
       'what_happened': 'ನಿಜವಾಗಿ ಏನಾಯಿತು?',
       'write_experience_hint': 'ನಿನ್ನ ಅನುಭವದ ಬಗ್ಗೆ ಬರೆ...',
@@ -3276,6 +3295,7 @@ class AppTexts {
       'move_to_next_level': 'അടുത്ത ലെവലിലേക്ക് നീങ്ങുക',
       // Reflection Screen
       'reflect': 'നിങ്ങളുടെ വളർച്ചയെക്കുറിച്ച് ചിന്തിക്കുക',
+      'challenge': 'വെല്ലുവിളി',
       'anxiety_q': 'നിങ്ങൾക്ക് എത്രത്തോളം ഉത്കണ്ഠ തോന്നി? (1-10)',
       'what_happened': 'യഥാർത്ഥത്തിൽ എന്താണ് സംഭവിച്ചത്?',
       'write_experience_hint': 'നിങ്ങളുടെ അനുഭവത്തെക്കുറിച്ച് എഴുതുക...',
@@ -3415,6 +3435,7 @@ class AppTexts {
       'move_to_next_level': 'पुढील स्तरावर जा',
       // Reflection Screen
       'reflect': 'तुमच्या प्रगतीचे पुनरावलोकन करा',
+      'challenge': 'आव्हान',
       'anxiety_q': 'तुला किती भीती वाटली? (1-10)',
       'what_happened': 'खरोखर काय घडले?',
       'write_experience_hint': 'तुझ्या अनुभवाविषयी लिही...',
@@ -3556,6 +3577,7 @@ class AppTexts {
       'move_to_next_level': 'Vá para o próximo nível',
       // Reflection Screen
       'reflect': 'Reflete sobre o teu crescimento',
+      'challenge': 'Desafio',
       'anxiety_q': 'Quão ansioso te sentiste? (1-10)',
       'what_happened': 'O que realmente aconteceu?',
       'write_experience_hint': 'Escreve sobre a tua experiência...',
@@ -3696,6 +3718,7 @@ class AppTexts {
       'move_to_next_level': 'Gå til neste nivå',
       // Reflection Screen
       'reflect': 'Reflekter over veksten din',
+      'challenge': 'Utfordring',
       'anxiety_q': 'Hvor engstelig følte du deg? (1-10)',
       'what_happened': 'Hva skjedde egentlig?',
       'write_experience_hint': 'Skriv om opplevelsen din...',
@@ -3835,6 +3858,7 @@ class AppTexts {
       'move_to_next_level': 'આગલા લેવલ પર જાઓ',
       // Reflection Screen
       'reflect': 'તમારા વિકાસ પર પ્રકાશ પાડો',
+      'challenge': 'પડકાર',
       'anxiety_q': 'તમે કેટલા ચિંતિત હતા? (1-10)',
       'what_happened': 'વાસ્તવમાં શું બન્યું હતું?',
       'write_experience_hint': 'તમારા અનુભવ વિશે લખો...',
@@ -3974,6 +3998,7 @@ class AppTexts {
       'move_to_next_level': 'ਅਗਲੇ ਲੈਵਲ \'ਤੇ ਜਾਓ',
       // Reflection Screen
       'reflect': 'ਆਪਣੇ ਵਿਕਾਸ ਬਾਰੇ ਸੋਚੋ',
+      'challenge': 'ਚੁਣੌਤੀ',
       'anxiety_q': 'ਤੁਸੀਂ ਕਿੰਨੀ ਚਿੰਤਾ ਮਹਿਸੂਸ ਕੀਤੀ? (1-10)',
       'what_happened': 'ਅਸਲ ਵਿੱਚ ਕੀ ਹੋਇਆ ਸੀ?',
       'write_experience_hint': 'ਆਪਣੇ ਅਨੁਭਵ ਬਾਰੇ ਲਿਖੋ...',
@@ -4113,6 +4138,7 @@ class AppTexts {
       'move_to_next_level': 'তুংগী লেভেলদা চৎলু',
       // Reflection Screen
       'reflect': 'নਹਾ গী চাওখৎপগী মতাংদা খন্নৌ',
+      'challenge': 'ꯆꯤꯡꯅꯕ',
       'anxiety_q': 'নஹাক করম্না অকিবা ফাওখিবগে? (১-১০)',
       'what_happened': 'অশেংবদা করী থোকখිබগে?',
       'write_experience_hint': 'ਨਹਾ গী এক্সপিরিয়েন্স অসি ইম্মু...',
@@ -4254,6 +4280,7 @@ class AppTexts {
       'move_to_next_level': 'Pergi ke Tahap Seterusnya',
       // Reflection Screen
       'reflect': 'Refleksi tentang perkembangan anda',
+      'challenge': 'Cabaran',
       'anxiety_q': 'Sejauh mana anda berasa gelisah? (1-10)',
       'what_happened': 'Apa yang sebenarnya berlaku?',
       'write_experience_hint': 'Tulis tentang pengalaman anda...',
@@ -4394,6 +4421,7 @@ class AppTexts {
       'move_to_next_level': 'เลื่อนไปยังระดับถัดไป',
       // Reflection Screen
       'reflect': 'ทบทวนการเติบโตของคุณ',
+      'challenge': 'ท้าทาย',
       'anxiety_q': 'คุณรู้สึกวิตกกังวลแค่ไหน? (1-10)',
       'what_happened': 'เกิดอะไรขึ้นจริงบ้าง?',
       'write_experience_hint': 'เขียนบอกเล่าเกี่ยวกับประสบการณ์ของคุณ...',
@@ -4535,6 +4563,7 @@ class AppTexts {
       'move_to_next_level': 'Tiến lên cấp độ tiếp theo',
       // Reflection Screen
       'reflect': 'Suy ngẫm về sự phát triển của bạn',
+      'challenge': 'Thử thách',
       'anxiety_q': 'Bạn đã cảm thấy lo lắng ở mức nào? (1-10)',
       'what_happened': 'Điều gì đã thực sự xảy ra?',
       'write_experience_hint': 'Viết về trải nghiệm của bạn...',
@@ -4676,6 +4705,7 @@ class AppTexts {
       'move_to_next_level': 'Pindah ke Tingkat Berikutnya',
       // Reflection Screen
       'reflect': 'Refleksikan perkembanganmu',
+      'challenge': 'Tantangan',
       'anxiety_q': 'Seberapa cemas yang kamu rasakan? (1-10)',
       'what_happened': 'Apa yang sebenarnya terjadi?',
       'write_experience_hint': 'Tulis tentang pengalamanmu...',
@@ -4816,6 +4846,7 @@ class AppTexts {
       'move_to_next_level': 'Bog go dtí an Chéad Leibhéal Eile',
       // Reflection Screen
       'reflect': 'Machnaigh ar do fhás',
+      'challenge': 'Dúshlán',
       'anxiety_q': 'Cé chomh himníoch as a bhraith tú? (1-10)',
       'what_happened': 'Cad a tharla i ndáiríre?',
       'write_experience_hint': 'Scríobh faoi do thaithí...',
@@ -4955,6 +4986,7 @@ class AppTexts {
       'move_to_next_level': 'Gå till nästa nivå',
       // Reflection Screen
       'reflect': 'Reflektera över din tillväxt',
+      'challenge': 'Utmaning',
       'anxiety_q': 'Hur mycket ångest kände du? (1-10)',
       'what_happened': 'Vad hände egentligen?',
       'write_experience_hint': 'Skriv om din upplevelse...',
@@ -23254,7 +23286,11 @@ class _AuthScreenState extends State<AuthScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.wb_sunny, size: 80, color: Colors.teal),
+                  Icon(
+                    Icons.wb_sunny,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   const SizedBox(height: 20),
                   Text(
                     _isLoginMode ? "Welcome Back" : "Join Bloom",
@@ -23478,7 +23514,7 @@ class _LevelMapScreenState extends State<LevelMapScreen> {
               double progress = (score / MAX_CONFIDENCE_SCORE).clamp(
                 0.0,
                 1.0,
-              ); // Uses 500
+              ); // Uses 880
               int streak = profile['currentStreak'] ?? 0;
 
               return SingleChildScrollView(
@@ -23772,7 +23808,7 @@ class ProgressScreen extends StatelessWidget {
                     Text(
                       email,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: Theme.of(context).colorScheme.primary,
                         decoration: TextDecoration.underline,
@@ -23930,10 +23966,10 @@ class ProgressScreen extends StatelessWidget {
   }
 
   String _getRank(double score) {
-    if (score < 10) return "Seedling";
-    if (score < 30) return "Sprout";
-    if (score < 60) return "Leaf";
-    if (score < 100) return "Stem";
+    if (score < 40) return "Seedling";
+    if (score < 140) return "Sprout";
+    if (score < 340) return "Leaf";
+    if (score < 580) return "Stem";
     return "Bloom";
   }
 
@@ -24080,7 +24116,10 @@ class _TaskScreenState extends State<TaskScreen> {
     if (!mounted || _isPickingTask) return;
     _isPickingTask = true;
 
-    if (mounted) setState(() => _isLoading = true);
+    // Only show loading on INITIAL load
+    if (_currentTask == null && mounted) {
+      setState(() => _isLoading = true);
+    }
 
     try {
       String lang = GlobalSettings.language.value;
@@ -24128,7 +24167,6 @@ class _TaskScreenState extends State<TaskScreen> {
         });
       }
     } on Exception catch (err) {
-      // FIXED: 'on Exception catch (err)'
       debugPrint("❌ Error picking task: $err");
       if (mounted) setState(() => _isLoading = false);
     } finally {
@@ -24139,11 +24177,6 @@ class _TaskScreenState extends State<TaskScreen> {
   void _completeTask() {
     if (_currentTask == null) return;
     setState(() => _isLoading = true);
-
-    GlobalSettings.completeTaskLocal(
-      _currentTask!['id']!,
-      _getLevelPoints(widget.levelName),
-    );
 
     Navigator.push(
       context,
@@ -24156,7 +24189,18 @@ class _TaskScreenState extends State<TaskScreen> {
           onDone: _onReflectionDone,
         ),
       ),
-    );
+    ).then((result) {
+      // result == true  -> Finish pressed: _onReflectionDone() already picked NEW task
+      // result != true  -> Back pressed: Do NOTHING (keep SAME task)
+      if (result != true) {
+        debugPrint("↩️ Back pressed in Reflection, KEEPING current task");
+        // Don't call _pickRandomTask() - keep the current task
+      } else {
+        debugPrint(
+          "✅ Finish pressed, _onReflectionDone already handled new task",
+        );
+      }
+    });
   }
 
   void _onReflectionDone() {
@@ -24167,16 +24211,17 @@ class _TaskScreenState extends State<TaskScreen> {
     );
 
     if (_levelTaskCount > 0 && _levelTaskCount % 10 == 0) {
-      // Use microtask to show dialog AFTER navigation completes
       Future.microtask(() => _showLevelUpSuggestion());
-    } else {
-      _pickRandomTask();
     }
+
+    // Pick NEW task after completion
+    _pickRandomTask();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return theLoadingScreen();
+    // Only show full loading screen on INITIAL load, not on return
+    if (_isLoading && _currentTask == null) return theLoadingScreen();
 
     return ValueListenableBuilder<String>(
       valueListenable: GlobalSettings.language,
@@ -24286,7 +24331,9 @@ class _TaskScreenState extends State<TaskScreen> {
                               ),
                             ),
                             child: Text(
-                              _isCompleted ? "Well Done!" : "I Completed This",
+                              _isCompleted
+                                  ? AppTexts.get("well_done", lang)
+                                  : AppTexts.get("i_completed", lang),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -24332,6 +24379,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
   final TextEditingController _noteController = TextEditingController();
   bool _isSaving = false;
 
+  // Update _finishReflection to return result
   void _finishReflection() async {
     setState(() => _isSaving = true);
     double points = 0;
@@ -24347,15 +24395,9 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
       points = 15.0;
 
     try {
-      // Add timeouts to prevent infinite hanging
       await UserService()
           .completeTask(widget.user, widget.taskId, points)
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw TimeoutException('completeTask timed out');
-            },
-          );
+          .timeout(const Duration(seconds: 10));
 
       await UserService()
           .saveReflection(widget.user, {
@@ -24365,14 +24407,8 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
             'note': _noteController.text,
             'date': DateFormat('MMM d, yyyy - hh:mm a').format(DateTime.now()),
           })
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw TimeoutException('saveReflection timed out');
-            },
-          );
+          .timeout(const Duration(seconds: 10));
     } on TimeoutException catch (e) {
-      // FIXED: 'on TimeoutException catch'
       debugPrint("⏱️ Reflection timeout: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -24380,7 +24416,6 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
         );
       }
     } catch (e) {
-      // Generic catch for other errors
       debugPrint("❌ Reflection error: $e");
       if (mounted) {
         ScaffoldMessenger.of(
@@ -24388,26 +24423,28 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
         ).showSnackBar(SnackBar(content: Text('Error saving: $e')));
       }
     } finally {
-      // FIXED: proper finally block (no variable name)
-      // CRITICAL: Always reset loading state
       if (mounted) setState(() => _isSaving = false);
     }
 
-    // Always call onDone and pop, even if save failed
+    // Return TRUE to indicate completion (Finish pressed)
     if (!mounted) return;
-    widget.onDone();
-    if (mounted) Navigator.pop(context);
+    widget.onDone(); // Calls _onReflectionDone() which picks new task
+    Navigator.pop(context, true); // true = Finish pressed
   }
 
   // Inside _ReflectionScreenState.build
   @override
   Widget build(BuildContext context) {
-    // ROOT SCAFFOLD
+    // ROOT SCAFFOLD - No PopScope needed
     return Scaffold(
       appBar: AppBar(
-        title: Tr('reflect'), // Tr handles its own listening
+        title: Tr('reflect'),
         elevation: 0,
-        // backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              Navigator.pop(context, false), // ← false = Back pressed
+        ),
       ),
       // BODY LISTENS TO LANGUAGE
       body: ValueListenableBuilder<String>(
@@ -24426,7 +24463,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                   ),
                 ),
                 Text(
-                  "Challenge: ${widget.taskTitle}",
+                  "${AppTexts.get("challenge", lang)}: ${widget.taskTitle}",
                   style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 40),
@@ -24487,10 +24524,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                   controller: _noteController,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    hintText: AppTexts.get(
-                      'write_experience_hint',
-                      lang,
-                    ), // Add this key to AppTexts or use Tr('write_experience_hint')
+                    hintText: AppTexts.get('write_experience_hint', lang),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -24502,7 +24536,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // Finish Button
+                // Finish Button - Returns true = completed
                 SizedBox(
                   width: double.infinity,
                   child: _isSaving
@@ -25299,7 +25333,10 @@ class FAQScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Tr(
                 faq['a']!,
-                style: const TextStyle(fontSize: 15, color: Colors.black54),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ],
