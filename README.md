@@ -20,7 +20,7 @@ Brand new milestones system, with growth shown in real time.
 
 Brand new beautiful user interface and layout with a choice for the user to select a colors from a variety of options.
 
-Number of languages for user to select from, for the texts in the app.
+30+ Languages languages for user to select from, for the text interface of the app.
 
 Subtle but elegant animations in many places.
 
