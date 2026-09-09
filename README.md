@@ -7,6 +7,16 @@ You level up: As you complete tasks, you earn points, maintain a streak, and gro
 It’s private: Your journey (thoughts, anxiety scores, history) stays 100% on your device. No cloud, no accounts required (Guest mode works fully).
 It’s reflective: After every task, you pause. How anxious was I? What actually happened? This rewires your brain to realize: "Oh, that wasn't catastrophic. I handled it."
 
+The Problem: Social anxiety isn't a character flaw; it’s a prediction error. Your brain predicts "Danger!" for safe situations (ordering coffee, saying hello). Avoidance reinforces the error.
+
+The Bloom Fix: You don't "fix" yourself. You collect data.
+
+Predict: "If I say hi, they'll ignore me / I'll freeze." (Anxiety: 8/10)
+Test: You do the micro-task (Say "Hi").
+Reflect: "They smiled back. I felt awkward for 3 seconds, then it passed." (Reality: Safe).
+Update: Your brain logs: Prediction wrong. Situation safe.
+Bloom automates this loop. The Reflection Screen is the engine. The Streak is the consistency. The Levels are the curriculum. You aren't "doing therapy"—you're just playing a game where the side effect is freedom.
+
 ## Bloom v2.00
 This is the latest update of the bloom app, introduced with many features to offer, such as: 
 
