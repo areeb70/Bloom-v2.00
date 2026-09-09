@@ -7,7 +7,7 @@ You level up: As you complete tasks, you earn points, maintain a streak, and gro
 It’s private: Your journey (thoughts, anxiety scores, history) stays 100% on your device. No cloud, no accounts required (Guest mode works fully).
 It’s reflective: After every task, you pause. How anxious was I? What actually happened? This rewires your brain to realize: "Oh, that wasn't catastrophic. I handled it."
 
-#Bloom v2.00
+## Bloom v2.00
 This is the latest update of the bloom app, introduced with many features to offer, such as: 
 Multiple login options including email, google and guest.
 Streak freeze system. 
