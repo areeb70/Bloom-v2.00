@@ -10,7 +10,7 @@ It’s reflective: After every task, you pause. How anxious was I? What actually
 ## Bloom v2.00
 This is the latest update of the bloom app, introduced with many features to offer, such as: 
 
-Multiple login options including email, google and guest.
+Multiple login options including cloud login with email or google, or login locally as guest.
 
 Streak freeze system. 
 
