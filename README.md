@@ -34,7 +34,7 @@ Brand new beautiful user interface and layout with a choice for the user to sele
 
 Subtle but elegant animations in many places.
 
-Many more features that are added are discussed in the changelog of the latest release.
+Many more features that are added are discussed in the release notes of the latest release.
 
 ### Getting Started
 
