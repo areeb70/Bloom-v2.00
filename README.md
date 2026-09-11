@@ -72,3 +72,22 @@ Reset is Safe (Profile → Reset All Progress). If you want a clean slate, it wi
 Tap "Continue as Guest." or login with email or google login. Do one tiny thing. Reflect. Watch the garden grow.
 
 Welcome to Bloom. We're glad you're here. 🌸
+
+
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-56-13_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/c1284f47-6598-4abb-babb-12fc56c75793" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-47-47_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/eba9aa28-c62c-435c-b861-65149a40ab93" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-41-98_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/524d441e-fd80-4c5f-8466-8447c5eb74e8" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-37-53_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/62929ad7-4ce8-414a-9303-0c3aade50324" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-31-68_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/c00fac75-d8c3-4963-981b-14a235ee72d5" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-15-80_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/24fcd21f-e00d-4493-b843-5b713f1657f7" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-11-55_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/b6b583d6-555c-44bf-b179-f11ae511bd60" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-12-00-00-09-05_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/bf318793-fd18-4f02-910a-54d64c063f59" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-59-58-24_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/51b71cb4-dacb-4ae4-9904-a39ca73077dc" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-59-55-74_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/0574a684-a2b9-4d8b-b864-827083aa22ad" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-59-48-24_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/55a4b018-a658-431b-bfc6-99720967280c" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-59-43-52_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/541aed85-e64c-4454-a779-7800ac6dbc36" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-59-38-51_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/c8f2361c-1136-4887-b663-a436a57923d3" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-59-28-36_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/cc68e0c3-3cf4-4879-9a8a-b756f167517a" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-59-19-17_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/95930733-a35a-4d26-84f3-d0b4cda1af1c" />
+<img width="1080" height="2412" alt="Screenshot_2026-09-11-23-58-55-11_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/ce0e6498-6710-4e99-954f-4b7a81ed62e1" />
+
