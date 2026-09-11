@@ -74,6 +74,8 @@ Tap "Continue as Guest." or login with email or google login. Do one tiny thing.
 Welcome to Bloom. We're glad you're here. 🌸
 
 
+
+
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-12-00-00-56-13_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/c1284f47-6598-4abb-babb-12fc56c75793" />
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-11-23-58-55-11_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/ce0e6498-6710-4e99-954f-4b7a81ed62e1" />
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-11-23-59-19-17_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/95930733-a35a-4d26-84f3-d0b4cda1af1c" />
