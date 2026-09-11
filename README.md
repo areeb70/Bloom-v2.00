@@ -77,6 +77,7 @@ Welcome to Bloom. We're glad you're here. 🌸
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-12-00-00-56-13_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/c1284f47-6598-4abb-babb-12fc56c75793" />
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-11-23-58-55-11_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/ce0e6498-6710-4e99-954f-4b7a81ed62e1" />
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-11-23-59-19-17_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/95930733-a35a-4d26-84f3-d0b4cda1af1c" />
+<img width="108.0" height="241.2" alt="Screenshot_2026-09-12-00-24-36-48_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/3f95f1c5-8f60-4e0d-88f5-ec059558cd1b" />
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-11-23-59-28-36_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/cc68e0c3-3cf4-4879-9a8a-b756f167517a" />
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-11-23-59-38-51_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/c8f2361c-1136-4887-b663-a436a57923d3" />
 <img width="108.0" height="241.2" alt="Screenshot_2026-09-11-23-59-43-52_09318d9e95e90b70bf8230dfca879fde" src="https://github.com/user-attachments/assets/541aed85-e64c-4454-a779-7800ac6dbc36" />
